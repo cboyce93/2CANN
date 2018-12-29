@@ -1,6 +1,15 @@
+#!/usr/bin/env python
+
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
+
+from lib.module import Module
+from lib.command import Command
+from util.validation import *
+
+# activate debugger
+import pdb
 
 class Handler:
 
@@ -23,6 +32,10 @@ class Handler:
         # let GTK know the event has been handled and that it should
         # not perform the default action
         return True
+    
+    def close_dialog(self, dialog, data=None):
+        dialog.hide()
+        return True
         
     ##############################
     """ Main Window Handlers """
@@ -35,6 +48,9 @@ class Handler:
     def on_variable_manager_activated(self, variable_manager):
         variable_manager.show()
     
+    def on_preferences_manager_activated(self, preferences_manager):
+        preferences_manager.show()
+    
     """ Help Menu Handlers """
     
     def on_about_activated(self, about_dialog):
@@ -46,6 +62,14 @@ class Handler:
     
     def on_new_module_clicked(self, module_editor):
         self.builder.get_object('module_editor_header').set_title('New Module')
+        # clear the entries
+        self.builder.get_object('module_category_search_entry').set_text("")
+        self.builder.get_object('module_name_entry').set_text("")
+        self.builder.get_object('module_author_entry').set_text("")
+        self.builder.get_object('module_description_entry').set_text("")
+        self.builder.get_object('module_url_entry').set_text("")
+        # Create new Module object
+        self.module = Module()
         module_editor.show()
     
     def on_editor_module_clicked(self, module_editor):
@@ -54,11 +78,36 @@ class Handler:
         
     ##############################
     """ Module Editor Handlers"""
-    ############################## 
+    ##############################
     
     def on_cmd_editor_clicked(self, command_editor):
+        if self.module.command is None:
+            self.module.command = Command()
         command_editor.show()
         
+    def on_save_module_button_clicked(self, data=None):
+        self.module.category = self.builder.get_object('module_category_search_entry').get_text()
+        self.module.name = self.builder.get_object('module_name_entry').get_text()
+        self.module.author = self.builder.get_object('module_author_entry').get_text()
+        self.module.desc = self.builder.get_object('module_description_entry').get_text()
+        self.module.url = self.builder.get_object('module_url_entry').get_text()
+        #### need to add this after self.module.command = None 
+        #pdb.set_trace()
+        # validate
+        valid, error_message = validate_module(self.module)
+        if valid:
+            self.module.save()
+            info_dialog = self.builder.get_object('info_dialog')
+            info_dialog.set_markup("<b>Info</b>")
+            info_dialog.format_secondary_markup(self.module.name + ".mod saved successfully.")
+            info_dialog.show()
+            self.builder.get_object('module_editor').hide()     
+        else:
+            warning_dialog = self.builder.get_object('warning_dialog')
+            warning_dialog.set_markup("<b>Warning</b>")
+            warning_dialog.format_secondary_markup(error_message)
+            warning_dialog.show()
+            
     ##############################
     """ Command Editor Handlers"""
     ##############################   
