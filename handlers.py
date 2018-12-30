@@ -7,15 +7,16 @@ from gi.repository import Gtk
 from lib.module import Module
 from lib.command import Command
 from util.validation import *
+from util.command_editor import *
 
 # activate debugger
 import pdb
 
 class Handler:
 
-    ##############################
+    ###################################
     """ Global Handlers """
-    ##############################
+    ###################################
     
     def exit(self, wrapper, data=None):
         wrapper.destroy()
@@ -37,9 +38,9 @@ class Handler:
         dialog.hide()
         return True
         
-    ##############################
+    ###################################
     """ Main Window Handlers """
-    ##############################
+    ###################################
             
     """ File Menu Handlers """
     
@@ -76,9 +77,9 @@ class Handler:
         self.builder.get_object('module_editor_header').set_title('Edit Module')
         module_editor.show()
         
-    ##############################
+    ###################################
     """ Module Editor Handlers"""
-    ##############################
+    ###################################
     
     def on_cmd_editor_clicked(self, command_editor):
         if self.module.command is None:
@@ -114,7 +115,12 @@ class Handler:
     
     
     def on_add_function_clicked(self, function_editor):
-        function_editor.show()
+        if self.module.command.func is None:
+            function_editor.show()
+        else:
+            self.builder.get_object('function_editor_header').set_title('Edit Function')
+            self.builder.get_object('function_editor_entry').set_text(self.module.command.func)
+            function_editor.show()
     
     def on_add_flag_option_clicked(self, flag_option_editor):
         flag_option_editor.show()
@@ -125,10 +131,27 @@ class Handler:
     def on_add_iter_option_clicked(self, iter_option_editor):
         iter_option_editor.show()
         
+    ###################################
+    """ Function Editor Handlers"""
+    ###################################
     
+    def on_fe_ok_button_clicked(self, function_editor):
+        self.module.command.func = self.builder.get_object('function_editor_entry').get_text()
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command)
+        function_editor.hide()
         
+    ###################################
+    """ Flag Option Editor Handlers"""
+    ###################################
+    
+    def on_foe_ok_button_clicked(self, flag_option_editor):
+        flag = self.builder.get_object('foe_flag_entry').get_text()
+        self.module.command.flags.append(flag)
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command)
+        flag_option_editor.hide()
     
     def __init__(self, builder):
         self.builder = builder
+        
 
 
