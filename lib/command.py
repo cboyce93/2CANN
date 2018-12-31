@@ -1,35 +1,17 @@
 #!/usr/bin/env python
 
 class Command:
-
-    def build_command_str():
-        cmd_str = ""
-        cmd_str += self.func
-        
-        #for flag in self.flags:
-            
     
-    def get_command_iters():
-        pass
-        
     def __init__(self):
         
         # command function
-        self.func = None
-        self.func_iters = None
-        
+        self.func = None        
         # command options
         self.flags = []
-        self.flag_iters = None
-
-        self.statics = []
-        self.static_iters = None
-        
+        self.statics = []   
         self.iters = []
-        self.iters_iters = None
-    
-    # getters and setters
-    
+        self.max_index = float(0)
+  
     @property
     def function(self):
         return self.__function
@@ -37,3 +19,9 @@ class Command:
     @function.setter
     def function(self, function):
         self.__function = function
+        
+    def get_max_index(self):
+        if self.func is not None:
+            return float(len(self.flags + self.statics + self.iters))
+        else:
+            return 0

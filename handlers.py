@@ -113,6 +113,10 @@ class Handler:
     """ Command Editor Handlers"""
     ##############################   
     
+    def on_index_spin_button_value_changed(self, index_spin_button):
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
+        
+        
     
     def on_add_function_clicked(self, function_editor):
         if self.module.command.func is None:
@@ -137,7 +141,8 @@ class Handler:
     
     def on_fe_ok_button_clicked(self, function_editor):
         self.module.command.func = self.builder.get_object('function_editor_entry').get_text()
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command)
+        self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
         function_editor.hide()
         
     ###################################
@@ -147,11 +152,15 @@ class Handler:
     def on_foe_ok_button_clicked(self, flag_option_editor):
         flag = self.builder.get_object('foe_flag_entry').get_text()
         self.module.command.flags.append(flag)
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command)
+        self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
         flag_option_editor.hide()
     
-    def __init__(self, builder):
+    def __init__(self, builder, tagtable):
         self.builder = builder
-        
+        self.tagtable = tagtable
+    
+    def get_index(self):
+        return self.builder.get_object('index_spin_button').get_value_as_int()
 
 
