@@ -140,6 +140,7 @@ class Handler:
     ###################################
     
     def on_fe_ok_button_clicked(self, function_editor):
+        # !! NOTE need to do validation here
         self.module.command.func = self.builder.get_object('function_editor_entry').get_text()
         self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
         update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
@@ -150,15 +151,45 @@ class Handler:
     ###################################
     
     def on_foe_ok_button_clicked(self, flag_option_editor):
+        # !! NOTE need to do validation here
         flag = self.builder.get_object('foe_flag_entry').get_text()
         self.module.command.flags.append(flag)
         self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
         update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
         flag_option_editor.hide()
+        
+    ####################################
+    """ Static Option Editor Handlers"""
+    ####################################
+    
+    def on_soe_ok_button_clicked(self, static_option_editor):
+        flag = self.builder.get_object('soe_flag_entry').get_text()
+        file_selection = self.builder.get_object('soe_file_selection_entry').get_text()
+        none_tag_selection = self.builder.get_object('soe_radio_none').get_active()
+        input_tag_selection = self.builder.get_object('soe_radio_input').get_active()
+        output_tag_selection = self.builder.get_object('soe_radio_output').get_active()
+        # !! NOTE need to do validation here 
+        if none_tag_selection:
+            file_selection_tag = 'none'
+        elif input_tag_selection:
+            file_selection_tag = 'input'
+        else:
+            file_selection_tag = 'output'
+        common_root = self.soe_common_root
+        print(common_root)
+        self.module.command.statics.append([flag, file_selection, file_selection_tag, common_root])
+        self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
+        static_option_editor.hide()
+    
+    def on_soe_file_chooser_selection_changed(self, file_chooser):
+        self.soe_common_root = file_chooser.get_uri()
+        print(self.soe_common_root)
     
     def __init__(self, builder, tagtable):
         self.builder = builder
         self.tagtable = tagtable
+        self.soe_common_root = None
     
     def get_index(self):
         return self.builder.get_object('index_spin_button').get_value_as_int()

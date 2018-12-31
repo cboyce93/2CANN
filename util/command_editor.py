@@ -30,34 +30,63 @@ def update_textview(textview, command, tagtable, index):
     buff = Gtk.TextBuffer.new(tagtable)
     cmd_str += command.func    
     
+    # calculate offsets and build command string
     if len(command.flags) > 0:
-        offset = func_offset
+        flag_offsets.append(func_offset + 1)
         for flag in command.flags:
             cmd_str += " " + flag
-            offset += len(flag) + 1
+            offset = len(cmd_str)+1
             flag_offsets.append(offset)
+        static_offsets.append(offset)
+        for static in command.statics:
+            cmd_str += " " + static[0] + " " + static[1]
+            offset = len(cmd_str)
+            static_offsets.append(offset)
+        
     
     buff.set_text(cmd_str, -1)
     
     # apply tags
+    
+    # function tag
     if index == 0:
         buff.apply_tag_by_name("active_func", buff.get_start_iter(), buff.get_iter_at_offset(len(command.func)))
     else:
         buff.apply_tag_by_name("func", buff.get_start_iter(), buff.get_iter_at_offset(len(command.func)))
-    if len(flag_offsets) > 0:
-        for i, offset in enumerate(flag_offsets):
-            if i == 0 and index == 1:
-                buff.apply_tag_by_name("active_flag", buff.get_iter_at_offset(func_offset + 1), buff.get_iter_at_offset(offset))
-            elif i == 0:
-                buff.apply_tag_by_name("flag", buff.get_iter_at_offset(func_offset + 1), buff.get_iter_at_offset(offset))
-            elif i+1 == index:
-                buff.apply_tag_by_name("active_flag", buff.get_iter_at_offset(flag_offsets[i - 1] + 1), buff.get_iter_at_offset(offset)) 
-            else:
-                buff.apply_tag_by_name("flag", buff.get_iter_at_offset(flag_offsets[i - 1] + 1), buff.get_iter_at_offset(offset))    
-        
-    #buff.apply_tag_by_name("static", buff.get_iter_at_offset(10), buff.get_iter_at_offset(23))
-    #buff.apply_tag_by_name("iter", buff.get_iter_at_offset(24), buff.get_end_iter())
     
+    # flag tag
+    
+    if len(flag_offsets) > 1:
+        #pdb.set_trace()
+        # drop last offset in loop since referenced by previous iteration
+        for i, offset in enumerate(flag_offsets[:-1]):
+            if index == i+1:
+                buff.apply_tag_by_name("active_flag", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(flag_offsets[i+1]))
+            else:
+                buff.apply_tag_by_name("flag", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(flag_offsets[i+1]))
+                
+    # static tag
+    
+    if len(static_offsets) > 1:
+        #pdb.set_trace()
+        # drop last offset in loop since referenced by previous iteration
+        for i, offset in enumerate(static_offsets[:-1]):
+            if index == i+1+len(command.flags):
+                buff.apply_tag_by_name("active_static", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(static_offsets[i+1]))
+            else:
+                buff.apply_tag_by_name("static", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(static_offsets[i+1]))
+                
+    # iter tag
+    
+    if len(static_offsets) > 1:
+        #pdb.set_trace()
+        # drop last offset in loop since referenced by previous iteration
+        for i, offset in enumerate(static_offsets[:-1]):
+            if index == i+1+len(command.flags):
+                buff.apply_tag_by_name("active_static", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(static_offsets[i+1]))
+            else:
+                buff.apply_tag_by_name("static", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(static_offsets[i+1]))
+       
     textview.set_buffer(buff)
     
 def init_tagtable():
@@ -104,7 +133,17 @@ def init_tagtable():
     static.props.scale = 1.3
     static.props.weight_set = True
     static.props.foreground = "green"
+    static.props.underline = 0
     static.props.underline_set = True
+    
+    # active static tag
+    active_static = Gtk.TextTag.new("active_static")
+    active_static.props.weight = 700
+    active_static.props.scale = 1.3
+    active_static.props.weight_set = True
+    active_static.props.foreground = "green"
+    active_static.props.underline = 1
+    active_static.props.underline_set = True
     
     # iter tag
     itertag = Gtk.TextTag.new("iter")
@@ -120,6 +159,7 @@ def init_tagtable():
     tagtable.add(flag)
     tagtable.add(active_flag)
     tagtable.add(static)
+    tagtable.add(active_static)
     tagtable.add(itertag)
     return tagtable
 
