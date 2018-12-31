@@ -109,6 +109,10 @@ class Handler:
             warning_dialog.format_secondary_markup(error_message)
             warning_dialog.show()
             
+    def on_module_editor_focus_in_event(self, module_command_entry, widget):
+        if self.module.command is not None:
+            module_command_entry.set_text(self.module.command.str)
+            
     ##############################
     """ Command Editor Handlers"""
     ##############################   
@@ -127,12 +131,15 @@ class Handler:
             function_editor.show()
     
     def on_add_flag_option_clicked(self, flag_option_editor):
+        # VALIDATION HERE
         flag_option_editor.show()
         
     def on_add_static_option_clicked(self, static_option_editor):
+        # VALIDATION HERE
         static_option_editor.show()
     
     def on_add_iter_option_clicked(self, iter_option_editor):
+        # VALIDATION HERE
         iter_option_editor.show()
         
     ###################################
@@ -176,7 +183,6 @@ class Handler:
         else:
             file_selection_tag = 'output'
         common_root = self.soe_common_root
-        print(common_root)
         self.module.command.statics.append([flag, file_selection, file_selection_tag, common_root])
         self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
         update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
@@ -185,6 +191,28 @@ class Handler:
     def on_soe_file_chooser_selection_changed(self, file_chooser):
         self.soe_common_root = file_chooser.get_uri()
         print(self.soe_common_root)
+    
+    ####################################
+    """ Iter Option Editor Handlers"""
+    ####################################
+    
+    def on_ioe_ok_button_clicked(self, iter_option_editor):
+        flag = self.builder.get_object('ioe_flag_entry').get_text()
+        file_selection = self.builder.get_object('ioe_file_selection_entry').get_text()
+        none_tag_selection = self.builder.get_object('ioe_radio_none').get_active()
+        input_tag_selection = self.builder.get_object('ioe_radio_input').get_active()
+        output_tag_selection = self.builder.get_object('ioe_radio_output').get_active()
+        # !! NOTE need to do validation here 
+        if none_tag_selection:
+            file_selection_tag = 'none'
+        elif input_tag_selection:
+            file_selection_tag = 'input'
+        else:
+            file_selection_tag = 'output'
+        self.module.command.iters.append([flag, file_selection, file_selection_tag])
+        self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
+        iter_option_editor.hide()
     
     def __init__(self, builder, tagtable):
         self.builder = builder
