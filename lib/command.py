@@ -5,7 +5,7 @@ class Command:
     def __init__(self):
         
         # command function
-        self.func = None        
+        self.func = ""        
         # command options
         self.flags = []
         self.statics = []   
@@ -24,7 +24,4 @@ class Command:
     def get_max_index(self):
         """ return max index of module command so that adjustment does
             not allow the input of out-of-range indices"""
-        if self.func is not None:
-            return float(len(self.flags + self.statics + self.iters))
-        else:
-            return 0
+        return float(len(self.flags) + len(self.statics) + len(self.iters))

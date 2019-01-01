@@ -13,5 +13,7 @@ def validate_module(m):
         return (False, error_message)
     else:
         return (True, None)
-        
+
+def validate_flag_module():
+    pass
     

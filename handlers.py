@@ -131,15 +131,12 @@ class Handler:
             function_editor.show()
     
     def on_add_flag_option_clicked(self, flag_option_editor):
-        # VALIDATION HERE
         flag_option_editor.show()
         
     def on_add_static_option_clicked(self, static_option_editor):
-        # VALIDATION HERE
         static_option_editor.show()
     
     def on_add_iter_option_clicked(self, iter_option_editor):
-        # VALIDATION HERE
         iter_option_editor.show()
         
     ###################################
