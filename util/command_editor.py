@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pythonf
 
 import gi
 gi.require_version("Gtk", "3.0")
@@ -59,9 +59,13 @@ def update_textview(textview, command, tagtable, index):
     # function tag
     if command.func != "":
         if index == get_func_index(command):
-            buff.apply_tag_by_name("active_func", buff.get_start_iter(), buff.get_iter_at_offset(len(command.func)))
+            buff.apply_tag_by_name("active_func", 
+                                    buff.get_start_iter(), 
+                                    buff.get_iter_at_offset(len(command.func)))
         else:
-            buff.apply_tag_by_name("func", buff.get_start_iter(), buff.get_iter_at_offset(len(command.func)))
+            buff.apply_tag_by_name("func", 
+                                    buff.get_start_iter(), 
+                                    buff.get_iter_at_offset(len(command.func)))
     
     # flag tag
     if len(flag_offsets) > 1:
@@ -69,9 +73,13 @@ def update_textview(textview, command, tagtable, index):
         # drop last offset in loop since referenced by previous iteration
         for i, offset in enumerate(flag_offsets[:-1]):
             if index == get_flag_index(command, i):
-                buff.apply_tag_by_name("active_flag", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(flag_offsets[i+1]))
+                buff.apply_tag_by_name("active_flag", 
+                                        buff.get_iter_at_offset(offset), 
+                                        buff.get_iter_at_offset(flag_offsets[i+1]))
             else:
-                buff.apply_tag_by_name("flag", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(flag_offsets[i+1]))
+                buff.apply_tag_by_name("flag", 
+                                        buff.get_iter_at_offset(offset), 
+                                        buff.get_iter_at_offset(flag_offsets[i+1]))
                 
     # static tag
     if len(static_offsets) > 1:
@@ -79,9 +87,13 @@ def update_textview(textview, command, tagtable, index):
         # drop last offset in loop since referenced by previous iteration
         for i, offset in enumerate(static_offsets[:-1]):
             if index == get_static_index(command, i):
-                buff.apply_tag_by_name("active_static", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(static_offsets[i+1]))
+                buff.apply_tag_by_name("active_static", 
+                                        buff.get_iter_at_offset(offset),
+                                        buff.get_iter_at_offset(static_offsets[i+1]))
             else:
-                buff.apply_tag_by_name("static", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(static_offsets[i+1]))
+                buff.apply_tag_by_name("static",
+                                        buff.get_iter_at_offset(offset), 
+                                        buff.get_iter_at_offset(static_offsets[i+1]))
                 
     # iter tag
     if len(iter_offsets) > 1:
@@ -89,9 +101,13 @@ def update_textview(textview, command, tagtable, index):
         # drop last offset in loop since referenced by previous iteration
         for i, offset in enumerate(iter_offsets[:-1]):
             if index == get_iter_index(command, i):
-                buff.apply_tag_by_name("active_itertag", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(iter_offsets[i+1]))
+                buff.apply_tag_by_name("active_itertag", 
+                                        buff.get_iter_at_offset(offset),
+                                        buff.get_iter_at_offset(iter_offsets[i+1]))
             else:
-                buff.apply_tag_by_name("itertag", buff.get_iter_at_offset(offset), buff.get_iter_at_offset(iter_offsets[i+1]))
+                buff.apply_tag_by_name("itertag", 
+                                        buff.get_iter_at_offset(offset), 
+                                        buff.get_iter_at_offset(iter_offsets[i+1]))
        
     textview.set_buffer(buff)
 

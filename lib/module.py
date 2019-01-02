@@ -14,7 +14,7 @@ class Module:
         self.author = None
         self.desc = None
         self.url = None
-        self.command = None
+        self.command = Command()
     
     # getters and setters
     

@@ -69,6 +69,7 @@ class Handler:
         self.builder.get_object('module_author_entry').set_text("")
         self.builder.get_object('module_description_entry').set_text("")
         self.builder.get_object('module_url_entry').set_text("")
+        self.builder.get_object('module_command_entry').set_text("")
         # Create new Module object
         self.module = Module()
         module_editor.show()
@@ -82,8 +83,6 @@ class Handler:
     ###################################
     
     def on_cmd_editor_clicked(self, command_editor):
-        if self.module.command is None:
-            self.module.command = Command()
         command_editor.show()
         
     def on_save_module_button_clicked(self, data=None):
@@ -118,9 +117,7 @@ class Handler:
     ##############################   
     
     def on_index_spin_button_value_changed(self, index_spin_button):
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
-        
-        
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())       
     
     def on_add_function_clicked(self, function_editor):
         if self.module.command.func is None:
@@ -138,7 +135,14 @@ class Handler:
     
     def on_add_iter_option_clicked(self, iter_option_editor):
         iter_option_editor.show()
-        
+    
+    def on_command_editor_delete_event(self, command_editor, data=None):
+        buff = Gtk.TextBuffer.new()
+        buff.set_text("", -1)
+        self.builder.get_object('command_editor_textview').set_buffer(buff)
+        command_editor.hide()
+        return True
+    
     ###################################
     """ Function Editor Handlers"""
     ###################################
