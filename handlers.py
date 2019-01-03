@@ -6,6 +6,8 @@ from gi.repository import Gtk
 
 from lib.module import Module
 from lib.command import Command
+from lib.variable import Variable
+from util.treeview import *
 from util.validation import *
 from util.command_editor import *
 
@@ -78,6 +80,59 @@ class Handler:
         self.builder.get_object('module_editor_header').set_title('Edit Module')
         module_editor.show()
         
+    ###################################
+    """ Variable Manager Handlers"""
+    ###################################
+        
+    def on_new_variable_clicked(self, variable_editor):
+        self.variable = Variable()
+        self.ve_state = 0
+        self.builder.get_object('ve_header').set_title('New Variable')
+        self.builder.get_object('ve_name_entry').set_text("")
+        self.builder.get_object('ve_file_selection_entry').set_text("")
+        
+        variable_editor.show()
+        
+    def on_edit_variable_clicked(self, variable_editor):
+        self.builder.get_object('ve_header').set_title('Edit Variable')
+        self.ve_state = 1
+        model, self.treeiter = self.builder.get_object('vm_treeview_selection').get_selected()
+        if self.treeiter is not None:
+            self.builder.get_object('ve_name_entry').set_text(model[self.treeiter][0][2:-1])
+            self.builder.get_object('ve_file_selection_entry').set_text(model[self.treeiter][1])
+            variable_editor.show()
+    
+    def on_del_variable_clicked(self, variable_editor):
+        model, self.treeiter = self.builder.get_object('vm_treeview_selection').get_selected()
+        self.variables_liststore.remove(self.treeiter)
+    
+    def on_vm_ok_button_clicked(self, variable_manager):
+        serialize_treemodel(self.builder.get_object('vm_treeview').get_model(),
+                            self.project)
+        pdb.set_trace()
+        self.builder.get_object('variable_editor').hide()
+        variable_manager.hide()
+
+    ###################################
+    """ Variable Editor Handlers"""
+    ###################################    
+    
+    def on_ve_ok_button_clicked(self, variable_editor):
+        name = self.builder.get_object('ve_name_entry').get_text()
+        fs = self.builder.get_object('ve_file_selection_entry').get_text()
+        # CALL VALIDATION SUB HERE
+        self.variable.name = "{$" + name +"}"
+        self.variable.val = fs
+        if self.ve_state == 0:
+            self.variables_liststore.append([self.variable.name, self.variable.val])
+        else:
+            self.variables_liststore.set_value(self.treeiter, [self.variable.name, self.variable.val])
+        variable_editor.hide()
+        
+        
+        
+        
+    
     ###################################
     """ Module Editor Handlers"""
     ###################################
@@ -215,9 +270,13 @@ class Handler:
         update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
         iter_option_editor.hide()
     
-    def __init__(self, builder, tagtable):
+    def __init__(self, project, builder, variables_liststore, tagtable):
+        self.project = project
         self.builder = builder
+        self.variables_liststore = variables_liststore
         self.tagtable = tagtable
+        self.module = None
+        self.variable = None
         self.soe_common_root = None
     
     def get_index(self):
