@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 """ This file contains subs related to file selection. Calls will be
-    from the variable manager/editor windows or the option editor windows
+    from the static/iter option editor windows
     """
 
-def serialize_selection(file_selection, textbuffer):
-    pass
+import pdb
 
-def parse_selection(file_selection):
-    fs = file_selection.split("*", 1)
+def parse_file_selection(file_selection, variables):
+    #pdb.set_trace()
+    for var in variables:
+        file_selection = file_selection.replace(var[0], var[1])
+    return file_selection

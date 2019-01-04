@@ -18,8 +18,9 @@ class twoCANN:
             column = Gtk.TreeViewColumn(col_title, renderer, text=i)
             column.set_sort_column_id(i)
             treeview.append_column(column)
-        return variables_liststore
-          
+        # FOR TEST
+        variables_liststore.append(["${ROOT}", "/home/cboyce/git/2CANN"])
+        return variables_liststore   
             
     def __init__(self):
         # Create new project

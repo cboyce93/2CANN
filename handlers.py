@@ -10,6 +10,9 @@ from lib.variable import Variable
 from util.treeview import *
 from util.validation import *
 from util.command_editor import *
+from util.file_selection import *
+
+import subprocess as SP
 
 # activate debugger
 import pdb
@@ -109,7 +112,6 @@ class Handler:
     def on_vm_ok_button_clicked(self, variable_manager):
         serialize_treemodel(self.builder.get_object('vm_treeview').get_model(),
                             self.project)
-        pdb.set_trace()
         self.builder.get_object('variable_editor').hide()
         variable_manager.hide()
 
@@ -121,23 +123,23 @@ class Handler:
         name = self.builder.get_object('ve_name_entry').get_text()
         fs = self.builder.get_object('ve_file_selection_entry').get_text()
         # CALL VALIDATION SUB HERE
-        self.variable.name = "{$" + name +"}"
+        self.variable.name = "${" + name +"}"
         self.variable.val = fs
         if self.ve_state == 0:
             self.variables_liststore.append([self.variable.name, self.variable.val])
         else:
             self.variables_liststore.set_value(self.treeiter, [self.variable.name, self.variable.val])
-        variable_editor.hide()
-        
-        
-        
-        
+        variable_editor.hide() 
     
     ###################################
     """ Module Editor Handlers"""
     ###################################
     
     def on_cmd_editor_clicked(self, command_editor):
+        update_textview(self.builder.get_object('command_editor_textview'),
+                                                self.module.command,
+                                                self.tagtable,
+                                                get_spinner_index(self.builder.get_object('index_spin_button')))
         command_editor.show()
         
     def on_save_module_button_clicked(self, data=None):
@@ -147,7 +149,6 @@ class Handler:
         self.module.desc = self.builder.get_object('module_description_entry').get_text()
         self.module.url = self.builder.get_object('module_url_entry').get_text()
         #### need to add this after self.module.command = None 
-        #pdb.set_trace()
         # validate
         valid, error_message = validate_module(self.module)
         if valid:
@@ -172,24 +173,86 @@ class Handler:
     ##############################   
     
     def on_index_spin_button_value_changed(self, index_spin_button):
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())       
+        update_textview(self.builder.get_object('command_editor_textview'), 
+                                                self.module.command,
+                                                self.tagtable,
+                                                get_spinner_index(self.builder.get_object('index_spin_button')))       
     
     def on_add_function_clicked(self, function_editor):
-        if self.module.command.func is None:
+        if self.module.command.func[2] is "":
             function_editor.show()
         else:
             self.builder.get_object('function_editor_header').set_title('Edit Function')
-            self.builder.get_object('function_editor_entry').set_text(self.module.command.func)
+            self.builder.get_object('function_editor_entry').set_text(self.module.command.func[2])
             function_editor.show()
     
     def on_add_flag_option_clicked(self, flag_option_editor):
+        self.edit_flag = False, None
+        self.builder.get_object('foe_header').set_title("Add Flag Option")
         flag_option_editor.show()
         
     def on_add_static_option_clicked(self, static_option_editor):
+        self.edit_flag = False, None
+        self.builder.get_object('soe_header').set_title("Add Static Option")
         static_option_editor.show()
     
     def on_add_iter_option_clicked(self, iter_option_editor):
+        self.edit_flag = False, None
+        self.builder.get_object('soe_header').set_title("Add Iterative Option")
         iter_option_editor.show()
+        
+    def on_ce_edit_button_clicked(self, data=None):
+        index = get_spinner_index(self.builder.get_object('index_spin_button'))
+        if index == self.module.command.func[0]:
+            # Edit function
+            self.builder.get_object('function_editor_header').set_title('Edit Function')
+            self.builder.get_object('function_editor_entry').set_text(self.module.command.func[2])
+            self.builder.get_object('function_editor').show()
+            return
+        for i,flag in enumerate(self.module.command.flags):
+            if index == flag[0]:
+                self.edit_flag = True, i
+                self.builder.get_object('foe_header').set_title("Edit Flag Option")
+                self.builder.get_object('foe_flag_entry').set_text(flag[2])
+                self.builder.get_object('flag_option_editor').show()
+                return
+        for i,static in enumerate(self.module.command.statics):
+            if index == static[0]:
+                self.edit_flag = True, i
+                self.builder.get_object('soe_header').set_title("Edit Static Option")
+                self.builder.get_object('soe_flag_entry').set_text(static[2])
+                if static[3] == "file":
+                    self.builder.get_object('soe_radio_file').set_active(True)
+                else:
+                    self.builder.get_object('soe_radio_directory').set_active(True)   
+                self.builder.get_object('soe_file_selection_entry').set_text(static[4])
+                if static[5] == "none":
+                    self.builder.get_object('soe_radio_none').set_active(True)
+                elif static[5] == "input":
+                    self.builder.get_object('soe_radio_input').set_active(True)
+                else:
+                    self.builder.get_object('soe_radio_output').set_active(True)
+                self.builder.get_object('common_root_dir_entry').set_text(static[6])
+                self.builder.get_object('static_option_editor').show()
+                return
+        for i,iterr in enumerate(self.module.command.iters):
+            if index == iterr[0]:
+                self.edit_flag = True, i
+                self.builder.get_object('soe_header').set_title("Edit Iterative Option")
+                self.builder.get_object('ioe_flag_entry').set_text(iterr[2])
+                if iterr[3] == "file":
+                    self.builder.get_object('ioe_radio_file').set_active(True)
+                else:
+                    self.builder.get_object('ioe_radio_directory').set_active(True)   
+                self.builder.get_object('ioe_file_selection_entry').set_text(iterr[4])
+                if iterr[5] == "none":
+                    self.builder.get_object('ioe_radio_none').set_active(True)
+                elif iterr[5] == "input":
+                    self.builder.get_object('ioe_radio_input').set_active(True)
+                else:
+                    self.builder.get_object('ioe_radio_output').set_active(True)
+                self.builder.get_object('iter_option_editor').show()
+                return
     
     def on_command_editor_delete_event(self, command_editor, data=None):
         buff = Gtk.TextBuffer.new()
@@ -204,9 +267,12 @@ class Handler:
     
     def on_fe_ok_button_clicked(self, function_editor):
         # !! NOTE need to do validation here
-        self.module.command.func = self.builder.get_object('function_editor_entry').get_text()
+        self.module.command.func = [None, "func", self.builder.get_object('function_editor_entry').get_text()]
         self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
+        update_textview(self.builder.get_object('command_editor_textview'),
+                                                self.module.command,
+                                                self.tagtable,
+                                                get_spinner_index(self.builder.get_object('index_spin_button')))
         function_editor.hide()
         
     ###################################
@@ -216,9 +282,13 @@ class Handler:
     def on_foe_ok_button_clicked(self, flag_option_editor):
         # !! NOTE need to do validation here
         flag = self.builder.get_object('foe_flag_entry').get_text()
-        self.module.command.flags.append(flag)
+        edit, index = self.edit_flag
+        if not edit:
+            self.module.command.flags.append([None, "flag", flag])
+        else:
+            self.module.command.flags[index][2] = flag
         self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, get_spinner_index(self.builder.get_object('index_spin_button')))
         flag_option_editor.hide()
         
     ####################################
@@ -227,48 +297,130 @@ class Handler:
     
     def on_soe_ok_button_clicked(self, static_option_editor):
         flag = self.builder.get_object('soe_flag_entry').get_text()
+        file_type_selection = self.builder.get_object('soe_radio_file').get_active()
         file_selection = self.builder.get_object('soe_file_selection_entry').get_text()
         none_tag_selection = self.builder.get_object('soe_radio_none').get_active()
         input_tag_selection = self.builder.get_object('soe_radio_input').get_active()
-        output_tag_selection = self.builder.get_object('soe_radio_output').get_active()
         # !! NOTE need to do validation here 
+        if file_type_selection:
+            file_selection_type = "file"
+        else:
+            file_selection_type = "directory"
+        
         if none_tag_selection:
             file_selection_tag = 'none'
         elif input_tag_selection:
             file_selection_tag = 'input'
         else:
             file_selection_tag = 'output'
-        common_root = self.soe_common_root
-        self.module.command.statics.append([flag, file_selection, file_selection_tag, common_root])
+            
+        common_root = self.builder.get_object('common_root_dir_entry').get_text()
+        
+        edit, index = self.edit_flag
+        if not edit:
+            self.module.command.statics.append([None, 
+                                                "static", 
+                                                flag,
+                                                file_selection_type,
+                                                file_selection,
+                                                file_selection_tag,
+                                                common_root])
+        else:
+            self.module.command.statics[index][2] = flag
+            self.module.command.statics[index][3] = file_selection_type
+            self.module.command.statics[index][4] = file_selection
+            self.module.command.statics[index][5] = file_selection_tag
+            self.module.command.statics[index][6] = common_root
+        
         self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
+        update_textview(self.builder.get_object('command_editor_textview'), 
+                                                self.module.command,
+                                                self.tagtable,
+                                                get_spinner_index(self.builder.get_object('index_spin_button')))
         static_option_editor.hide()
     
-    def on_soe_file_chooser_selection_changed(self, file_chooser):
-        self.soe_common_root = file_chooser.get_uri()
-        print(self.soe_common_root)
+    def on_soe_view_file_selection_button_clicked(self, file_selection_viewer):
+        # get file selection & file type from entry
+        ftype = self.builder.get_object('soe_radio_file').get_active()
+        if not ftype:
+            ftype = False      
+        fs = self.builder.get_object('soe_file_selection_entry').get_text()
+        # CALL VALIDATION SUB HERE
+        # !!! NOTE for file type selections, last char must not be /
+        # !!! NOTE for directory type selections, last character must not be
+        # wildcard *
+        self.list_file_selection_contents(fs, ftype)
     
+    def on_soe_view_common_root_selection_button_clicked(self, file_selection_viewer):
+        # get file selection & file type from entry
+        ftype = False      
+        fs = self.builder.get_object('common_root_dir_entry').get_text()
+        # CALL VALIDATION SUB HERE
+        # !!! NOTE for file type selections, last char must not be /
+        # !!! NOTE for directory type selections, last character must not be
+        # wildcard *
+        self.list_file_selection_contents(fs, ftype)
+        
     ####################################
     """ Iter Option Editor Handlers"""
     ####################################
     
     def on_ioe_ok_button_clicked(self, iter_option_editor):
         flag = self.builder.get_object('ioe_flag_entry').get_text()
+        file_type_selection = self.builder.get_object('ioe_radio_file').get_active()
         file_selection = self.builder.get_object('ioe_file_selection_entry').get_text()
         none_tag_selection = self.builder.get_object('ioe_radio_none').get_active()
         input_tag_selection = self.builder.get_object('ioe_radio_input').get_active()
-        output_tag_selection = self.builder.get_object('ioe_radio_output').get_active()
         # !! NOTE need to do validation here 
+        if file_type_selection:
+            file_selection_type = "file"
+        else:
+            file_selection_type = "directory"
+        
         if none_tag_selection:
             file_selection_tag = 'none'
         elif input_tag_selection:
             file_selection_tag = 'input'
         else:
             file_selection_tag = 'output'
-        self.module.command.iters.append([flag, file_selection, file_selection_tag])
+        
+        edit, index = self.edit_flag
+        if not edit:
+            self.module.command.iters.append([None,
+                                            "iter",
+                                            flag,
+                                            file_selection_type,
+                                            file_selection,
+                                            file_selection_tag])
+        else:
+            self.module.command.iters[index][2] = flag
+            self.module.command.iters[index][3] = file_selection_type
+            self.module.command.iters[index][4] = file_selection
+            self.module.command.iters[index][5] = file_selection_tag
+        
         self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, self.get_index())
+        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, get_spinner_index(self.builder.get_object('index_spin_button')))
         iter_option_editor.hide()
+        
+    def on_ioe_view_selection_button_clicked(self, file_selection_viewer):
+        # get file selection & file type from entry
+        ftype = self.builder.get_object('ioe_radio_file').get_active()
+        if not ftype:
+            ftype = False      
+        fs = self.builder.get_object('ioe_file_selection_entry').get_text()
+        # CALL VALIDATION SUB HERE
+        # !!! NOTE for file type selections, last char must not be /
+        # !!! NOTE for directory type selections, last character must not be
+        # wildcard *
+        self.list_file_selection_contents(fs, ftype)
+    
+    ######################################
+    """ File Selection Viewer Handlers"""
+    ######################################
+    
+    #handlers go here
+    
+    ######################################
     
     def __init__(self, project, builder, variables_liststore, tagtable):
         self.project = project
@@ -277,9 +429,30 @@ class Handler:
         self.tagtable = tagtable
         self.module = None
         self.variable = None
-        self.soe_common_root = None
+        self.stdout = ""
     
-    def get_index(self):
-        return self.builder.get_object('index_spin_button').get_value_as_int()
-
+    ######################################
+    """ General Subroutines """
+    ######################################
+        
+    def list_file_selection_contents(self, fs, ftype):
+        fs = parse_file_selection(fs, self.project.vars)
+        # run returns CompletedProcess Object >> cp
+        cmd = "ls -1"
+        if not ftype:
+            # add directory flag
+            cmd += "d"
+        cmd += " " + fs
+        cp = SP.run([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True)
+        if cp.returncode != 0:
+            stderr = cp.stderr.decode(encoding='UTF-8')
+            warning_dialog = self.builder.get_object('warning_dialog')
+            warning_dialog.set_markup("<b>Warning</b>")
+            warning_dialog.format_secondary_markup(stderr)
+            warning_dialog.show()
+        else:
+            stdout = cp.stdout.decode(encoding='UTF-8')
+            self.stdout = stdout.split("\n\n", 1)[0]
+            self.builder.get_object('file_selection_buffer').set_text(self.stdout, -1)   
+            self.builder.get_object('file_selection_viewer').show()
 

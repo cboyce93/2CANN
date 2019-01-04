@@ -14,41 +14,47 @@ want to keep out of the handlers.py file
     
 """    
 
-def update_textview(textview, command, tagtable, index):
+def update_textview(textview, command, tagtable, spinner_index):
     
     # init vars
     command.str = ""
     flag_offsets = []
     static_offsets = []
     iter_offsets = []
-    
-    # reset active index
-    #tagtable.foreach(reset_tags, None)
       
-    #pdb.set_trace()
     buff = Gtk.TextBuffer.new(tagtable)
     
     # calculate offsets and build command string
     offset = 0
-    if command.func != "":
-        command.str += command.func
-        offset = len(command.func)
+    index = 0
+    
+    if command.func[2] != "":
+        command.str += command.func[2]
+        command.func[0] = 0
+        index += 1
+        offset = len(command.str)
     if len(command.flags) > 0:
         flag_offsets.append(offset + 1)
         for flag in command.flags:
-            command.str += " " + flag
+            command.str += " " + flag[2]
+            flag[0] = index
+            index += 1
             offset = len(command.str)+1
             flag_offsets.append(offset)
     if len(command.statics) > 0:
         static_offsets.append(offset)
         for static in command.statics:
-            command.str += " " + static[0] + " " + static[1]
+            command.str += " " + static[2] + " " + static[4]
+            static[0] = index
+            index += 1
             offset = len(command.str)+1
             static_offsets.append(offset)
     if len(command.iters) > 0:
         iter_offsets.append(offset)
         for iterr in command.iters:
-            command.str += " " + iterr[0] + " " + iterr[1]
+            command.str += " " + iterr[2] + " " + iterr[4]
+            iterr[0] = index
+            index += 1
             offset = len(command.str)+1
             iter_offsets.append(offset)
     
@@ -57,22 +63,22 @@ def update_textview(textview, command, tagtable, index):
     # apply tags
     
     # function tag
-    if command.func != "":
-        if index == get_func_index(command):
+    if command.func[2] != "":
+        if spinner_index == get_func_index(command):
             buff.apply_tag_by_name("active_func", 
                                     buff.get_start_iter(), 
-                                    buff.get_iter_at_offset(len(command.func)))
+                                    buff.get_iter_at_offset(len(command.func[2])))
         else:
             buff.apply_tag_by_name("func", 
                                     buff.get_start_iter(), 
-                                    buff.get_iter_at_offset(len(command.func)))
+                                    buff.get_iter_at_offset(len(command.func[2])))
     
     # flag tag
     if len(flag_offsets) > 1:
         #pdb.set_trace()
         # drop last offset in loop since referenced by previous iteration
         for i, offset in enumerate(flag_offsets[:-1]):
-            if index == get_flag_index(command, i):
+            if spinner_index == get_flag_index(command, i):
                 buff.apply_tag_by_name("active_flag", 
                                         buff.get_iter_at_offset(offset), 
                                         buff.get_iter_at_offset(flag_offsets[i+1]))
@@ -86,7 +92,7 @@ def update_textview(textview, command, tagtable, index):
         #pdb.set_trace()
         # drop last offset in loop since referenced by previous iteration
         for i, offset in enumerate(static_offsets[:-1]):
-            if index == get_static_index(command, i):
+            if spinner_index == get_static_index(command, i):
                 buff.apply_tag_by_name("active_static", 
                                         buff.get_iter_at_offset(offset),
                                         buff.get_iter_at_offset(static_offsets[i+1]))
@@ -100,7 +106,7 @@ def update_textview(textview, command, tagtable, index):
         #pdb.set_trace()
         # drop last offset in loop since referenced by previous iteration
         for i, offset in enumerate(iter_offsets[:-1]):
-            if index == get_iter_index(command, i):
+            if spinner_index == get_iter_index(command, i):
                 buff.apply_tag_by_name("active_itertag", 
                                         buff.get_iter_at_offset(offset),
                                         buff.get_iter_at_offset(iter_offsets[i+1]))
@@ -112,28 +118,31 @@ def update_textview(textview, command, tagtable, index):
     textview.set_buffer(buff)
 
 def get_func_index(command):
-    if command.func == "":
+    if command.func[2] == "":
         return -1
     else:
         return 0
 
 def get_flag_index(command, index):
-    if command.func == "":
+    if command.func[2] == "":
         return index
     else:
         return 1 + index
 
 def get_static_index(command, index):
-    if command.func == "":
+    if command.func[2] == "":
         return index + len(command.flags)
     else:
         return 1 + index + len(command.flags)
 
 def get_iter_index(command, index):
-    if command.func == "":
+    if command.func[2] == "":
         return index + len(command.flags) + len(command.statics)
     else:
         return 1 + index + len(command.flags) + len(command.statics)
+
+def get_spinner_index(spinner):
+        return spinner.get_value_as_int()
 
 def init_tagtable():
     tagtable = Gtk.TextTagTable.new()
