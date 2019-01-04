@@ -46,7 +46,7 @@ Author: Cameron Boyce
   <object class="GtkImage" id="export">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-redo</property>
+    <property name="stock">gtk-revert-to-saved</property>
   </object>
   <object class="GtkTextBuffer" id="file_selection_buffer"/>
   <object class="GtkWindow" id="file_selection_viewer">
@@ -381,29 +381,6 @@ Author: Cameron Boyce
                         </child>
                         <child>
                           <object class="GtkImageMenuItem">
-                            <property name="label">gtk-quit</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="use_underline">True</property>
-                            <property name="use_stock">True</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkMenuItem">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Pipeline</property>
-                    <property name="use_underline">True</property>
-                    <child type="submenu">
-                      <object class="GtkMenu">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <child>
-                          <object class="GtkImageMenuItem">
                             <property name="label" translatable="yes">Import</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
@@ -418,6 +395,21 @@ Author: Cameron Boyce
                             <property name="can_focus">False</property>
                             <property name="image">export</property>
                             <property name="use_stock">False</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkSeparatorMenuItem">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkImageMenuItem">
+                            <property name="label">gtk-quit</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="use_underline">True</property>
+                            <property name="use_stock">True</property>
                           </object>
                         </child>
                       </object>
@@ -537,7 +529,7 @@ Author: Cameron Boyce
                         <property name="can_focus">False</property>
                         <property name="margin_top">10</property>
                         <property name="margin_bottom">5</property>
-                        <property name="label" translatable="yes">Pipeline Editor</property>
+                        <property name="label" translatable="yes">Project Editor</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1019,7 +1011,6 @@ Author: Cameron Boyce
     <property name="website_label" translatable="yes">www.cannlab.ca</property>
     <property name="authors">Cameron Boyce
 W. Dale Stevens
-Gary R. Turner
 Naail Khan</property>
     <property name="documenters">Sam Guraya</property>
     <property name="logo">img/about_dialog_logo.png</property>

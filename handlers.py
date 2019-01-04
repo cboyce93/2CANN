@@ -12,8 +12,6 @@ from util.validation import *
 from util.command_editor import *
 from util.file_selection import *
 
-import subprocess as SP
-
 # activate debugger
 import pdb
 
@@ -349,7 +347,7 @@ class Handler:
         # !!! NOTE for file type selections, last char must not be /
         # !!! NOTE for directory type selections, last character must not be
         # wildcard *
-        self.list_file_selection_contents(fs, ftype)
+        list_file_selection_contents(self.builder, self.project.vars, fs, ftype)
     
     def on_soe_view_common_root_selection_button_clicked(self, file_selection_viewer):
         # get file selection & file type from entry
@@ -359,7 +357,7 @@ class Handler:
         # !!! NOTE for file type selections, last char must not be /
         # !!! NOTE for directory type selections, last character must not be
         # wildcard *
-        self.list_file_selection_contents(fs, ftype)
+        list_file_selection_contents(self.builder, self.project.vars, fs, ftype)
         
     ####################################
     """ Iter Option Editor Handlers"""
@@ -412,7 +410,7 @@ class Handler:
         # !!! NOTE for file type selections, last char must not be /
         # !!! NOTE for directory type selections, last character must not be
         # wildcard *
-        self.list_file_selection_contents(fs, ftype)
+        list_file_selection_contents(builder.builder, self.project.vars, fs, ftype)
     
     ######################################
     """ File Selection Viewer Handlers"""
@@ -429,30 +427,6 @@ class Handler:
         self.tagtable = tagtable
         self.module = None
         self.variable = None
-        self.stdout = ""
+        self.stdout = ""      
     
-    ######################################
-    """ General Subroutines """
-    ######################################
-        
-    def list_file_selection_contents(self, fs, ftype):
-        fs = parse_file_selection(fs, self.project.vars)
-        # run returns CompletedProcess Object >> cp
-        cmd = "ls -1"
-        if not ftype:
-            # add directory flag
-            cmd += "d"
-        cmd += " " + fs
-        cp = SP.run([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True)
-        if cp.returncode != 0:
-            stderr = cp.stderr.decode(encoding='UTF-8')
-            warning_dialog = self.builder.get_object('warning_dialog')
-            warning_dialog.set_markup("<b>Warning</b>")
-            warning_dialog.format_secondary_markup(stderr)
-            warning_dialog.show()
-        else:
-            stdout = cp.stdout.decode(encoding='UTF-8')
-            self.stdout = stdout.split("\n\n", 1)[0]
-            self.builder.get_object('file_selection_buffer').set_text(self.stdout, -1)   
-            self.builder.get_object('file_selection_viewer').show()
 
