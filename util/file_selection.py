@@ -31,8 +31,10 @@ def list_file_selection_contents(builder, project_vars, fs, ftype):
             concat_fs = []
             # iter through shell output of files which already exist
             # and add user prefix
+            #pdb.set_trace()
             for fp in stdout.split("\n"):
-                concat_fs.append(concatenate(fp, fs_arr))
+                if fp != '':
+                    concat_fs.append(concatenate(fp, fs_arr))
             # print to buffer
             stdout = print_buffer(concat_fs)
         builder.get_object('file_selection_buffer').set_text(stdout, -1)   
