@@ -11,6 +11,7 @@ from util.treeview import *
 from util.validation import *
 from util.command_editor import *
 from util.file_selection import *
+from lib.load import load_module
 
 # activate debugger
 import pdb
@@ -62,7 +63,9 @@ class Handler:
         
     """ Pipeline Editor Toolbar Handlers """
     
-    """ Library Manager Toolbar Handlers """
+    ########################################
+    """ Library Manager Handlers """
+    ########################################
     
     def on_new_module_clicked(self, module_editor):
         self.builder.get_object('module_editor_header').set_title('New Module')
@@ -79,7 +82,22 @@ class Handler:
     
     def on_editor_module_clicked(self, module_editor):
         self.builder.get_object('module_editor_header').set_title('Edit Module')
+        self.builder.get_object('module_category_search_entry').set_text(self.module.category)
+        self.builder.get_object('module_name_entry').set_text(self.module.name)
+        self.builder.get_object('module_author_entry').set_text(self.module.author)
+        self.builder.get_object('module_description_entry').set_text(self.module.desc)
+        self.builder.get_object('module_url_entry').set_text(self.module.url)
+        self.builder.get_object('module_command_entry').set_text("")
         module_editor.show()
+    
+    def on_lib_manager_selection_changed(self, selection):
+        #pdb.set_trace()
+        model, iterr = selection.get_selected()
+        fp = model.get_value(iterr, 4)
+        print(self.module.command)
+        self.module = load_module(fp)
+        print(self.module.command)
+        
         
     ###################################
     """ Variable Manager Handlers"""
@@ -150,11 +168,16 @@ class Handler:
         # validate
         valid, error_message = validate_module(self.module)
         if valid:
-            self.module.save()
+            self.module.save(self.project.root)
             info_dialog = self.builder.get_object('info_dialog')
             info_dialog.set_markup("<b>Info</b>")
             info_dialog.format_secondary_markup(self.module.name + ".mod saved successfully.")
             info_dialog.show()
+            self.lib_liststore.append([self.module.category, 
+                                        self.module.name,
+                                        self.module.author,
+                                        self.module.desc,
+                                        self.module.fp])
             self.builder.get_object('module_editor').hide()     
         else:
             warning_dialog = self.builder.get_object('warning_dialog')
@@ -163,6 +186,7 @@ class Handler:
             warning_dialog.show()
             
     def on_module_editor_focus_in_event(self, module_command_entry, widget):
+        print(self.module.command.str)
         if self.module.command is not None:
             module_command_entry.set_text(self.module.command.str)
             
@@ -256,6 +280,7 @@ class Handler:
         buff = Gtk.TextBuffer.new()
         buff.set_text("", -1)
         self.builder.get_object('command_editor_textview').set_buffer(buff)
+        self.builder.get_object('index_spin_button').set_value(float(0))
         command_editor.hide()
         return True
     
@@ -410,7 +435,7 @@ class Handler:
         # !!! NOTE for file type selections, last char must not be /
         # !!! NOTE for directory type selections, last character must not be
         # wildcard *
-        list_file_selection_contents(builder.builder, self.project.vars, fs, ftype)
+        list_file_selection_contents(self.builder, self.project.vars, fs, ftype)
     
     ######################################
     """ File Selection Viewer Handlers"""
@@ -420,10 +445,11 @@ class Handler:
     
     ######################################
     
-    def __init__(self, project, builder, variables_liststore, tagtable):
+    def __init__(self, project, builder, liststores, tagtable):
         self.project = project
         self.builder = builder
-        self.variables_liststore = variables_liststore
+        self.variables_liststore = liststores[0]
+        self.lib_liststore = liststores[1]
         self.tagtable = tagtable
         self.module = None
         self.variable = None

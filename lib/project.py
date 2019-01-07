@@ -1,4 +1,4 @@
-#!/usr/bin/env pythons
+#!/usr/bin/env python3
 
 class Project:
     
@@ -6,3 +6,4 @@ class Project:
         self.name = name
         self.filename = None
         self.vars = []
+        self.root = '/home/cboyce/2CANN/'

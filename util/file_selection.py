@@ -31,7 +31,6 @@ def list_file_selection_contents(builder, project_vars, fs, ftype):
             concat_fs = []
             # iter through shell output of files which already exist
             # and add user prefix
-            #pdb.set_trace()
             for fp in stdout.split("\n"):
                 if fp != '':
                     concat_fs.append(concatenate(fp, fs_arr))
@@ -71,10 +70,12 @@ def concatenate(fp, fs_arr):
             to_concat.insert(i, fs[1:-1])
 
 def remove_wildcards(fp, fs_arr):
-    # find the all * chars and prepend with . and append ?
-    # so we get .*? which can be used in regex to populate with
-    # contents outputted by the shell
-    # dont care about prefix so skip it
+    """ find the all * chars and prepend with . and append ?
+    so we get .*? which can be used in regex to populate with
+    contents outputted by the shell. Return fs_arr with wildcards
+    filled in with the values return by shell. """
+    
+    # dont care about prefix at index 1 so skip it
     for j in [0,2]:
         regex = fs_arr[j]
         no_of_wc = 0
