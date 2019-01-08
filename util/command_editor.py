@@ -20,7 +20,7 @@ def update_textview(textview, command, tagtable, spinner_index):
     command.str = ""
     flag_offsets = []
     static_offsets = []
-    iter_offsets = []
+    set_offsets = []
       
     buff = Gtk.TextBuffer.new(tagtable)
     
@@ -44,19 +44,19 @@ def update_textview(textview, command, tagtable, spinner_index):
     if len(command.statics) > 0:
         static_offsets.append(offset)
         for static in command.statics:
-            command.str += " " + static[2] + " " + static[4]
+            command.str += " " + static[2] + " " + static[3]
             static[0] = index
             index += 1
             offset = len(command.str)+1
             static_offsets.append(offset)
-    if len(command.iters) > 0:
-        iter_offsets.append(offset)
-        for iterr in command.iters:
+    if len(command.sets) > 0:
+        set_offsets.append(offset)
+        for iterr in command.sets:
             command.str += " " + iterr[2] + " " + iterr[4]
             iterr[0] = index
             index += 1
             offset = len(command.str)+1
-            iter_offsets.append(offset)
+            set_offsets.append(offset)
     
     buff.set_text(command.str, -1)
     
@@ -101,19 +101,27 @@ def update_textview(textview, command, tagtable, spinner_index):
                                         buff.get_iter_at_offset(offset), 
                                         buff.get_iter_at_offset(static_offsets[i+1]))
                 
-    # iter tag
-    if len(iter_offsets) > 1:
+    # set tag
+    if len(set_offsets) > 1:
         #pdb.set_trace()
         # drop last offset in loop since referenced by previous iteration
-        for i, offset in enumerate(iter_offsets[:-1]):
-            if spinner_index == get_iter_index(command, i):
-                buff.apply_tag_by_name("active_itertag", 
+        for i, offset in enumerate(set_offsets[:-1]):
+            if spinner_index == get_iter_index(command, i) and command.sets[i][5] != 'input':
+                buff.apply_tag_by_name("active_set_tag", 
                                         buff.get_iter_at_offset(offset),
-                                        buff.get_iter_at_offset(iter_offsets[i+1]))
+                                        buff.get_iter_at_offset(set_offsets[i+1]))
+            elif spinner_index == get_iter_index(command, i) and command.sets[i][5] == 'input':
+                buff.apply_tag_by_name("active_input_set_tag", 
+                                        buff.get_iter_at_offset(offset),
+                                        buff.get_iter_at_offset(set_offsets[i+1]))
+            elif command.sets[i][5] == 'input':
+                buff.apply_tag_by_name("input_set_tag", 
+                                        buff.get_iter_at_offset(offset),
+                                        buff.get_iter_at_offset(set_offsets[i+1]))
             else:
-                buff.apply_tag_by_name("itertag", 
+                buff.apply_tag_by_name("set_tag", 
                                         buff.get_iter_at_offset(offset), 
-                                        buff.get_iter_at_offset(iter_offsets[i+1]))
+                                        buff.get_iter_at_offset(set_offsets[i+1]))
        
     textview.set_buffer(buff)
 
@@ -200,23 +208,44 @@ def init_tagtable():
     active_static.props.underline = 1
     active_static.props.underline_set = True
     
-    # iter tag
-    itertag = Gtk.TextTag.new("itertag")
-    itertag.props.weight = 500
-    itertag.props.scale = 1.3
-    itertag.props.weight_set = True
-    itertag.props.foreground = "blue"
-    itertag.props.underline = 0
-    itertag.props.underline_set = True
+    # active set tag
+    active_set_tag = Gtk.TextTag.new("active_set_tag")
+    active_set_tag.props.weight = 700
+    active_set_tag.props.scale = 1.3
+    active_set_tag.props.weight_set = True
+    active_set_tag.props.foreground = "blue"
+    active_set_tag.props.underline = 1
+    active_set_tag.props.underline_set = True
     
-    # active iter tag
-    active_itertag = Gtk.TextTag.new("active_itertag")
-    active_itertag.props.weight = 700
-    active_itertag.props.scale = 1.3
-    active_itertag.props.weight_set = True
-    active_itertag.props.foreground = "blue"
-    active_itertag.props.underline = 1
-    active_itertag.props.underline_set = True   
+    # set tag
+    set_tag = Gtk.TextTag.new("set_tag")
+    set_tag.props.weight = 500
+    set_tag.props.scale = 1.3
+    set_tag.props.weight_set = True
+    set_tag.props.foreground = "blue"
+    set_tag.props.underline = 0
+    set_tag.props.underline_set = True
+    
+    # input set tag
+    input_set_tag = Gtk.TextTag.new("input_set_tag")
+    input_set_tag.props.weight = 500
+    input_set_tag.props.scale = 1.3
+    input_set_tag.props.weight_set = True
+    input_set_tag.props.foreground = "blue"
+    input_set_tag.props.underline = 0
+    input_set_tag.props.underline_set = True
+    input_set_tag.props.background = "yellow"
+    
+    # active input set tag
+    active_input_set_tag = Gtk.TextTag.new("active_input_set_tag")
+    active_input_set_tag.props.weight = 700
+    active_input_set_tag.props.scale = 1.3
+    active_input_set_tag.props.weight_set = True
+    active_input_set_tag.props.foreground = "blue"
+    active_input_set_tag.props.underline = 1
+    active_input_set_tag.props.underline_set = True
+    active_input_set_tag.props.background = "yellow"
+    
     
     tagtable.add(func)
     tagtable.add(active_func)
@@ -224,7 +253,10 @@ def init_tagtable():
     tagtable.add(active_flag)
     tagtable.add(static)
     tagtable.add(active_static)
-    tagtable.add(itertag)
-    tagtable.add(active_itertag)
+    tagtable.add(set_tag)
+    tagtable.add(active_set_tag)
+    tagtable.add(input_set_tag)
+    tagtable.add(active_input_set_tag)
+    
     return tagtable
 

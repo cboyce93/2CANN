@@ -144,7 +144,8 @@ class Handler:
         if self.ve_state == 0:
             self.variables_liststore.append([self.variable.name, self.variable.val])
         else:
-            self.variables_liststore.set_value(self.treeiter, [self.variable.name, self.variable.val])
+            self.variables_liststore.set_value(self.treeiter, 0 , self.variable.name)
+            self.variables_liststore.set_value(self.treeiter, 1, self.variable.val)                       
         variable_editor.hide() 
     
     ###################################
@@ -211,17 +212,25 @@ class Handler:
     def on_add_flag_option_clicked(self, flag_option_editor):
         self.edit_flag = False, None
         self.builder.get_object('foe_header').set_title("Add Flag Option")
+        self.builder.get_object('foe_flag_entry').set_text("")
         flag_option_editor.show()
         
     def on_add_static_option_clicked(self, static_option_editor):
         self.edit_flag = False, None
         self.builder.get_object('soe_header').set_title("Add Static Option")
+        self.builder.get_object('soe_flag_entry').set_text("")
+        self.builder.get_object('soe_static_arg_entry').set_text("")
         static_option_editor.show()
     
-    def on_add_iter_option_clicked(self, iter_option_editor):
+    def on_add_set_option_clicked(self, set_option_editor):
         self.edit_flag = False, None
-        self.builder.get_object('soe_header').set_title("Add Iterative Option")
-        iter_option_editor.show()
+        self.builder.get_object('se_header').set_title("Add Set Option")
+        self.builder.get_object('se_flag_entry').set_text("")
+        self.builder.get_object('se_radio_file').set_active(True)
+        self.builder.get_object('se_file_selection_entry').set_text("")
+        self.builder.get_object('se_radio_none').set_active(True)
+        self.builder.get_object('se_match_none').set_active(True)
+        set_option_editor.show()
         
     def on_ce_edit_button_clicked(self, data=None):
         index = get_spinner_index(self.builder.get_object('index_spin_button'))
@@ -243,39 +252,53 @@ class Handler:
                 self.edit_flag = True, i
                 self.builder.get_object('soe_header').set_title("Edit Static Option")
                 self.builder.get_object('soe_flag_entry').set_text(static[2])
-                if static[3] == "file":
-                    self.builder.get_object('soe_radio_file').set_active(True)
-                else:
-                    self.builder.get_object('soe_radio_directory').set_active(True)   
-                self.builder.get_object('soe_file_selection_entry').set_text(static[4])
-                if static[5] == "none":
-                    self.builder.get_object('soe_radio_none').set_active(True)
-                elif static[5] == "input":
-                    self.builder.get_object('soe_radio_input').set_active(True)
-                else:
-                    self.builder.get_object('soe_radio_output').set_active(True)
-                self.builder.get_object('common_root_dir_entry').set_text(static[6])
+                self.builder.get_object('soe_static_arg_entry').set_text(static[3])
                 self.builder.get_object('static_option_editor').show()
                 return
-        for i,iterr in enumerate(self.module.command.iters):
-            if index == iterr[0]:
+        for i,sett in enumerate(self.module.command.sets):
+            if index == sett[0]:
                 self.edit_flag = True, i
-                self.builder.get_object('soe_header').set_title("Edit Iterative Option")
-                self.builder.get_object('ioe_flag_entry').set_text(iterr[2])
-                if iterr[3] == "file":
-                    self.builder.get_object('ioe_radio_file').set_active(True)
+                self.builder.get_object('se_header').set_title("Edit Set Option")
+                self.builder.get_object('se_flag_entry').set_text(sett[2])
+                if sett[3] == "file":
+                    self.builder.get_object('se_radio_file').set_active(True)
                 else:
-                    self.builder.get_object('ioe_radio_directory').set_active(True)   
-                self.builder.get_object('ioe_file_selection_entry').set_text(iterr[4])
-                if iterr[5] == "none":
-                    self.builder.get_object('ioe_radio_none').set_active(True)
-                elif iterr[5] == "input":
-                    self.builder.get_object('ioe_radio_input').set_active(True)
+                    self.builder.get_object('se_radio_directory').set_active(True)   
+                self.builder.get_object('se_file_selection_entry').set_text(sett[4])
+                if sett[5] == "none":
+                    self.builder.get_object('se_radio_none').set_active(True)
+                elif sett[5] == "input":
+                    self.builder.get_object('se_radio_input').set_active(True)
                 else:
-                    self.builder.get_object('ioe_radio_output').set_active(True)
-                self.builder.get_object('iter_option_editor').show()
+                    self.builder.get_object('se_radio_output').set_active(True)
+                if sett[6] == 'none':
+                    self.builder.get_object('se_match_none').set_active(True)
+                elif sett[6] == 'source':
+                    self.builder.get_object('se_match_source').set_active(True)
+                else:
+                    self.builder.get_object('se_match_clone').set_active(True)
+                self.builder.get_object('set_option_editor').show()
                 return
     
+    def on_ce_del_button_clicked(self, data=None):
+        #pdb.set_trace()
+        index = get_spinner_index(self.builder.get_object('index_spin_button'))
+        if index == self.module.command.func[0]:
+            self.module.command.func = [None, None, ""]
+        for i,flag in enumerate(self.module.command.flags):
+            if index == flag[0]:
+                self.module.command.flags.remove(flag)
+        for i,static in enumerate(self.module.command.statics):
+            if index == static[0]:
+                self.module.command.statics.remove(static)
+        for i,sett in enumerate(self.module.command.sets):
+            if index == sett[0]:
+                self.module.command.sets.remove(sett)
+        update_textview(self.builder.get_object('command_editor_textview'), 
+                                                self.module.command,
+                                                self.tagtable,
+                                                get_spinner_index(self.builder.get_object('index_spin_button')))
+            
     def on_command_editor_delete_event(self, command_editor, data=None):
         buff = Gtk.TextBuffer.new()
         buff.set_text("", -1)
@@ -320,40 +343,17 @@ class Handler:
     
     def on_soe_ok_button_clicked(self, static_option_editor):
         flag = self.builder.get_object('soe_flag_entry').get_text()
-        file_type_selection = self.builder.get_object('soe_radio_file').get_active()
-        file_selection = self.builder.get_object('soe_file_selection_entry').get_text()
-        none_tag_selection = self.builder.get_object('soe_radio_none').get_active()
-        input_tag_selection = self.builder.get_object('soe_radio_input').get_active()
-        # !! NOTE need to do validation here 
-        if file_type_selection:
-            file_selection_type = "file"
-        else:
-            file_selection_type = "directory"
-        
-        if none_tag_selection:
-            file_selection_tag = 'none'
-        elif input_tag_selection:
-            file_selection_tag = 'input'
-        else:
-            file_selection_tag = 'output'
-            
-        common_root = self.builder.get_object('common_root_dir_entry').get_text()
+        static_arg = self.builder.get_object('soe_static_arg_entry').get_text()
         
         edit, index = self.edit_flag
         if not edit:
             self.module.command.statics.append([None, 
                                                 "static", 
                                                 flag,
-                                                file_selection_type,
-                                                file_selection,
-                                                file_selection_tag,
-                                                common_root])
+                                                static_arg])
         else:
             self.module.command.statics[index][2] = flag
-            self.module.command.statics[index][3] = file_selection_type
-            self.module.command.statics[index][4] = file_selection
-            self.module.command.statics[index][5] = file_selection_tag
-            self.module.command.statics[index][6] = common_root
+            self.module.command.statics[index][3] = static_arg
         
         self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
         update_textview(self.builder.get_object('command_editor_textview'), 
@@ -361,39 +361,19 @@ class Handler:
                                                 self.tagtable,
                                                 get_spinner_index(self.builder.get_object('index_spin_button')))
         static_option_editor.hide()
-    
-    def on_soe_view_file_selection_button_clicked(self, file_selection_viewer):
-        # get file selection & file type from entry
-        ftype = self.builder.get_object('soe_radio_file').get_active()
-        if not ftype:
-            ftype = False      
-        fs = self.builder.get_object('soe_file_selection_entry').get_text()
-        # CALL VALIDATION SUB HERE
-        # !!! NOTE for file type selections, last char must not be /
-        # !!! NOTE for directory type selections, last character must not be
-        # wildcard *
-        list_file_selection_contents(self.builder, self.project.vars, fs, ftype)
-    
-    def on_soe_view_common_root_selection_button_clicked(self, file_selection_viewer):
-        # get file selection & file type from entry
-        ftype = False      
-        fs = self.builder.get_object('common_root_dir_entry').get_text()
-        # CALL VALIDATION SUB HERE
-        # !!! NOTE for file type selections, last char must not be /
-        # !!! NOTE for directory type selections, last character must not be
-        # wildcard *
-        list_file_selection_contents(self.builder, self.project.vars, fs, ftype)
-        
+
     ####################################
-    """ Iter Option Editor Handlers"""
+    """ Set Option Editor Handlers"""
     ####################################
     
-    def on_ioe_ok_button_clicked(self, iter_option_editor):
-        flag = self.builder.get_object('ioe_flag_entry').get_text()
-        file_type_selection = self.builder.get_object('ioe_radio_file').get_active()
-        file_selection = self.builder.get_object('ioe_file_selection_entry').get_text()
-        none_tag_selection = self.builder.get_object('ioe_radio_none').get_active()
-        input_tag_selection = self.builder.get_object('ioe_radio_input').get_active()
+    def on_se_ok_button_clicked(self, set_option_editor):
+        flag = self.builder.get_object('se_flag_entry').get_text()
+        file_type_selection = self.builder.get_object('se_radio_file').get_active()
+        file_selection = self.builder.get_object('se_file_selection_entry').get_text()
+        none_tag_selection = self.builder.get_object('se_radio_none').get_active()
+        input_tag_selection = self.builder.get_object('se_radio_input').get_active()
+        none_match_selection = self.builder.get_object('se_match_none').get_active()
+        source_match_selection = self.builder.get_object('se_match_source').get_active()
         # !! NOTE need to do validation here 
         if file_type_selection:
             file_selection_type = "file"
@@ -407,30 +387,43 @@ class Handler:
         else:
             file_selection_tag = 'output'
         
+        if none_match_selection:
+            matching = 'none'
+        elif source_match_selection:
+            matching = 'source'
+        else:
+            matching = 'clone'
+        
         edit, index = self.edit_flag
         if not edit:
-            self.module.command.iters.append([None,
+            self.module.command.sets.append([None,
                                             "iter",
                                             flag,
                                             file_selection_type,
                                             file_selection,
-                                            file_selection_tag])
+                                            file_selection_tag,
+                                            matching])
         else:
-            self.module.command.iters[index][2] = flag
-            self.module.command.iters[index][3] = file_selection_type
-            self.module.command.iters[index][4] = file_selection
-            self.module.command.iters[index][5] = file_selection_tag
+            self.module.command.sets[index][2] = flag
+            self.module.command.sets[index][3] = file_selection_type
+            self.module.command.sets[index][4] = file_selection
+            self.module.command.sets[index][5] = file_selection_tag
+            self.module.command.sets[index][6] = matching
+            
         
         self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, get_spinner_index(self.builder.get_object('index_spin_button')))
-        iter_option_editor.hide()
+        update_textview(self.builder.get_object('command_editor_textview'), 
+                                                self.module.command,
+                                                self.tagtable,
+                                                get_spinner_index(self.builder.get_object('index_spin_button')))
+        set_option_editor.hide()
         
     def on_ioe_view_selection_button_clicked(self, file_selection_viewer):
         # get file selection & file type from entry
-        ftype = self.builder.get_object('ioe_radio_file').get_active()
+        ftype = self.builder.get_object('se_radio_file').get_active()
         if not ftype:
             ftype = False      
-        fs = self.builder.get_object('ioe_file_selection_entry').get_text()
+        fs = self.builder.get_object('se_file_selection_entry').get_text()
         # CALL VALIDATION SUB HERE
         # !!! NOTE for file type selections, last char must not be /
         # !!! NOTE for directory type selections, last character must not be

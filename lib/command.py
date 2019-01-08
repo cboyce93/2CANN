@@ -9,7 +9,7 @@ class Command:
         # command options
         self.flags = []
         self.statics = []   
-        self.iters = []
+        self.sets = []
         self.max_index = float(0)
         self.str = ""
   
@@ -24,4 +24,7 @@ class Command:
     def get_max_index(self):
         """ return max index of module command so that adjustment does
             not allow the input of out-of-range indices"""
-        return float(len(self.flags) + len(self.statics) + len(self.iters))
+        if self.func[2] == "":
+            return float(len(self.flags) + len(self.statics) + len(self.sets) - 1)
+        else:
+            return float(len(self.flags) + len(self.statics) + len(self.sets))

@@ -19,7 +19,6 @@ class twoCANN:
             column.set_sort_column_id(i)
             treeview.append_column(column)
         # FOR TEST
-        variables_liststore.append(["${ROOT}", "/home/cboyce/git/2CANN"])
         return variables_liststore
         
     def __init_lib_manager_treeview(self, treeview):

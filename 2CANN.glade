@@ -1901,9 +1901,9 @@ Naail Khan</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="tooltip_markup" translatable="yes">&lt;b&gt;Iterative Option:&lt;/b&gt; Insert iterative option into command.</property>
-                    <property name="label" translatable="yes">iter</property>
+                    <property name="label" translatable="yes">set</property>
                     <property name="use_underline">True</property>
-                    <signal name="clicked" handler="on_add_iter_option_clicked" object="iter_option_editor" swapped="no"/>
+                    <signal name="clicked" handler="on_add_set_option_clicked" object="set_option_editor" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1943,6 +1943,7 @@ Naail Khan</property>
                     <property name="label" translatable="yes">__glade_unnamed_134</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-delete</property>
+                    <signal name="clicked" handler="on_ce_del_button_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2135,9 +2136,9 @@ Naail Khan</property>
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="iter_option_editor">
+  <object class="GtkWindow" id="set_option_editor">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Iter Option Editor</property>
+    <property name="title" translatable="yes">Set Option Editor</property>
     <property name="resizable">False</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon">img/icon.png</property>
@@ -2153,10 +2154,10 @@ Naail Khan</property>
         <property name="orientation">vertical</property>
         <property name="spacing">10</property>
         <child>
-          <object class="GtkHeaderBar" id="soe_heade">
+          <object class="GtkHeaderBar" id="se_header">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="title" translatable="yes">Add Iterative Option</property>
+            <property name="title" translatable="yes">Add Set Option</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -2193,7 +2194,7 @@ Naail Khan</property>
                 <property name="halign">start</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkEntry" id="ioe_flag_entry">
+                  <object class="GtkEntry" id="se_flag_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">20</property>
@@ -2227,7 +2228,7 @@ Naail Khan</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkRadioButton" id="ioe_radio_none">
+                  <object class="GtkRadioButton" id="se_radio_none">
                     <property name="label" translatable="yes">None</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2242,13 +2243,13 @@ Naail Khan</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkRadioButton" id="ioe_radio_input">
+                  <object class="GtkRadioButton" id="se_radio_input">
                     <property name="label" translatable="yes">Input</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
-                    <property name="group">ioe_radio_none</property>
+                    <property name="group">se_radio_none</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2257,13 +2258,13 @@ Naail Khan</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkRadioButton" id="ioe_radio_output">
+                  <object class="GtkRadioButton" id="se_radio_output">
                     <property name="label" translatable="yes">Output</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
-                    <property name="group">ioe_radio_none</property>
+                    <property name="group">se_radio_none</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2291,7 +2292,7 @@ Naail Khan</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="ioe_file_selection_entry">
+              <object class="GtkEntry" id="se_file_selection_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="width_chars">50</property>
@@ -2331,7 +2332,7 @@ Naail Khan</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkRadioButton" id="ioe_radio_file">
+                  <object class="GtkRadioButton" id="se_radio_file">
                     <property name="label" translatable="yes">File</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2346,13 +2347,13 @@ Naail Khan</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkRadioButton" id="ioe_radio_directory">
+                  <object class="GtkRadioButton" id="se_radio_directory">
                     <property name="label" translatable="yes">Directory</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
-                    <property name="group">ioe_radio_file</property>
+                    <property name="group">se_radio_file</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2365,6 +2366,79 @@ Naail Khan</property>
                 <property name="left_attach">1</property>
                 <property name="top_attach">1</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">&lt;b&gt;Matching:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkRadioButton" id="se_match_none">
+                    <property name="label" translatable="yes">None</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="se_match_source">
+                    <property name="label" translatable="yes">Source</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">se_match_none</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="se_match_clone">
+                    <property name="label" translatable="yes">Clone</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">se_match_none</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
             </child>
             <child>
               <placeholder/>
@@ -2399,7 +2473,7 @@ Naail Khan</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="close_button" object="iter_option_editor" swapped="no"/>
+                <signal name="clicked" handler="close_button" object="set_option_editor" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2408,7 +2482,7 @@ Naail Khan</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="ioe_ok_button">
+              <object class="GtkButton" id="se_ok_button">
                 <property name="label">gtk-ok</property>
                 <property name="width_request">100</property>
                 <property name="height_request">30</property>
@@ -2416,7 +2490,7 @@ Naail Khan</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_ioe_ok_button_clicked" object="iter_option_editor" swapped="no"/>
+                <signal name="clicked" handler="on_se_ok_button_clicked" object="set_option_editor" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2513,126 +2587,7 @@ Naail Khan</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;b&gt;Common Root:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;Selection Tags:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkRadioButton" id="soe_radio_none">
-                    <property name="label" translatable="yes">None</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="soe_radio_input">
-                    <property name="label" translatable="yes">Input</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">soe_radio_none</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="soe_radio_output">
-                    <property name="label" translatable="yes">Output</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">soe_radio_none</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="label" translatable="yes">View Selection...</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_soe_view_file_selection_button_clicked" object="file_selection_viewer" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">2</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="soe_file_selection_entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="width_chars">50</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;b&gt;File Selection:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;Type:&lt;/b&gt;</property>
+                <property name="label" translatable="yes">&lt;b&gt;Static Argument:&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
               </object>
               <packing>
@@ -2641,77 +2596,15 @@ Naail Khan</property>
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkEntry" id="soe_static_arg_entry">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkRadioButton" id="soe_radio_file">
-                    <property name="label" translatable="yes">File</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="soe_radio_directory">
-                    <property name="label" translatable="yes">Directory</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">soe_radio_file</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
+                <property name="can_focus">True</property>
+                <property name="width_chars">20</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">1</property>
               </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="common_root_dir_entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="label" translatable="yes">View Selection...</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_soe_view_common_root_selection_button_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">2</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>
