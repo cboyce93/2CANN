@@ -33,7 +33,29 @@ class twoCANN:
                 column.set_visible(False)
         # FOR TEST
         return lib_liststore  
-            
+    
+    def __init_loop_manager_treeview(self, treeview):
+        loop_liststore = Gtk.ListStore(int, str, str, str)
+        treeview.set_model(loop_liststore)
+        for i, col_title in enumerate(["No.", "Var", "Value", "Directory Selection"]):
+            renderer = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(col_title, renderer, text=i)
+            column.set_sort_column_id(i)
+            treeview.append_column(column)
+        # FOR TEST
+        return loop_liststore
+    
+    def __init_loop_viewer_treeview(self, treeview):
+        lv_liststore = Gtk.ListStore(str, str)
+        treeview.set_model(lv_liststore)
+        for i, col_title in enumerate(["Var Value", "Directory Selection"]):
+            renderer = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(col_title, renderer, text=i)
+            column.set_sort_column_id(i)
+            treeview.append_column(column)
+        # FOR TEST
+        return lv_liststore
+
     def __init__(self):
         # Create new project object
         project = Project('Untitled.pro')
@@ -42,7 +64,9 @@ class twoCANN:
         # Setup treeviews and liststores
         variables_liststore = self.__init_var_manager_treeview(builder.get_object('vm_treeview'))
         lib_liststore = self.__init_lib_manager_treeview(builder.get_object('lib_treeview'))
-        liststores = (variables_liststore, lib_liststore)
+        loop_liststore = self.__init_loop_manager_treeview(builder.get_object('loop_treeview'))
+        loop_viewer_liststore = self.__init_loop_viewer_treeview(builder.get_object('loop_viewer_treeview'))
+        liststores = (variables_liststore, lib_liststore, loop_liststore, loop_viewer_liststore)
         # build tag table for command editor Gtk.TextView for different
         # text styles
         tagtable = init_tagtable()

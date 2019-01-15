@@ -6,4 +6,4 @@ class Project:
         self.name = name
         self.filename = None
         self.vars = []
-        self.root = '/home/cboyce/2CANN/'
+        self.working_directory = None

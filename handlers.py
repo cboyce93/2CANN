@@ -11,6 +11,7 @@ from util.treeview import *
 from util.validation import *
 from util.command_editor import *
 from util.file_selection import *
+from util.loop import *
 from lib.load import load_module
 
 # activate debugger
@@ -94,9 +95,7 @@ class Handler:
         #pdb.set_trace()
         model, iterr = selection.get_selected()
         fp = model.get_value(iterr, 4)
-        print(self.module.command)
         self.module = load_module(fp)
-        print(self.module.command)
         
         
     ###################################
@@ -131,6 +130,13 @@ class Handler:
         self.builder.get_object('variable_editor').hide()
         variable_manager.hide()
 
+    ###################################
+    """ Preferences Handlers"""
+    ###################################
+    
+    def on_work_dir_chooser_file_set(self, file_chooser):
+        self.project.working_directory = file_chooser.get_filename()   
+    
     ###################################
     """ Variable Editor Handlers"""
     ###################################    
@@ -187,7 +193,6 @@ class Handler:
             warning_dialog.show()
             
     def on_module_editor_focus_in_event(self, module_command_entry, widget):
-        print(self.module.command.str)
         if self.module.command is not None:
             module_command_entry.set_text(self.module.command.str)
             
@@ -200,6 +205,16 @@ class Handler:
                                                 self.module.command,
                                                 self.tagtable,
                                                 get_spinner_index(self.builder.get_object('index_spin_button')))       
+
+    
+    def ce_on_add_loop_clicked(self, loop_editor):
+        self.builder.get_object('le_var_entry').set_text("")
+        self.builder.get_object('le_dir_selection_entry').set_text("")
+        loop_editor.show()
+    
+    def ce_on_view_loop_clicked(self, loop_viewer):
+        view_looper(self.builder, self.project, self.module.command.loops)
+        loop_viewer.show()
     
     def on_add_function_clicked(self, function_editor):
         if self.module.command.func[2] is "":
@@ -306,6 +321,31 @@ class Handler:
         self.builder.get_object('index_spin_button').set_value(float(0))
         command_editor.hide()
         return True
+    
+    
+    ###################################
+    """ Loop Editor Handlers"""
+    ###################################
+    
+    def on_view_loop_clicked(self, loop_viewer):
+        local_var = self.builder.get_object('le_var_entry').get_text()
+        dir_selection = self.builder.get_object('le_dir_selection_entry').get_text()
+        view_loop(self.builder, self.project, self.lv_liststore, local_var, dir_selection)
+        loop_viewer.show()
+    
+    def on_le_ok_button_clicked(self, loop_editor):
+        var = self.builder.get_object('le_var_entry').get_text()
+        dir_selection = self.builder.get_object('le_dir_selection_entry').get_text()
+        loop_no = len(self.module.command.loops)+1
+        self.module.command.loops.append([loop_no,
+                                    "$"+var,
+                                    get_local_var_value(dir_selection),
+                                    dir_selection])
+        self.loop_liststore.append([loop_no,
+                                    "$"+var,
+                                    get_local_var_value(dir_selection),
+                                    dir_selection])
+        loop_editor.hide()
     
     ###################################
     """ Function Editor Handlers"""
@@ -443,6 +483,8 @@ class Handler:
         self.builder = builder
         self.variables_liststore = liststores[0]
         self.lib_liststore = liststores[1]
+        self.loop_liststore = liststores[2]
+        self.lv_liststore = liststores[3]
         self.tagtable = tagtable
         self.module = None
         self.variable = None

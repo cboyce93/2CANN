@@ -5,7 +5,8 @@ class Command:
     def __init__(self):
         
         # command function
-        self.func = [None, None, ""]        
+        self.func = [None, None, ""] 
+        self.loops = []       
         # command options
         self.flags = []
         self.statics = []   
