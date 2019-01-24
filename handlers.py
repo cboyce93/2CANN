@@ -218,8 +218,8 @@ class Handler:
         loop_viewer.show()
     
     def ce_on_run_clicked(self, data=None):
-        pdb.set_trace()
-        run_module(self.builder, self.project, self.module)
+        return_code = run_module(self.builder, self.project, self.module)
+        #if return_code
     
     def on_add_function_clicked(self, function_editor):
         if self.module.command.func[2] is "":

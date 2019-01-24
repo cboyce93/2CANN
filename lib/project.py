@@ -5,5 +5,5 @@ class Project:
     def __init__(self, name):
         self.name = name
         self.filename = None
-        self.vars = [["${ROOT}", "YA"]]
+        self.vars = []
         self.working_directory = None
