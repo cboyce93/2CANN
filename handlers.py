@@ -12,6 +12,7 @@ from util.validation import *
 from util.command_editor import *
 from util.file_selection import *
 from util.loop import *
+from util.run import *
 from lib.load import load_module
 
 # activate debugger
@@ -215,6 +216,10 @@ class Handler:
     def ce_on_view_loop_clicked(self, loop_viewer):
         view_looper(self.builder, self.project, self.module.command.loops)
         loop_viewer.show()
+    
+    def ce_on_run_clicked(self, data=None):
+        pdb.set_trace()
+        run_module(self.builder, self.project, self.module)
     
     def on_add_function_clicked(self, function_editor):
         if self.module.command.func[2] is "":
