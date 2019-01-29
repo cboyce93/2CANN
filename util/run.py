@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from gi.repository import GLib, Gtk, GObject
 
@@ -13,47 +13,39 @@ import pdb
 
 def update_terminal(args):
     cp = args[0]
-    terminal = args[1]
+    textview = args[1]
     buff = args[2]
     start = time.time()
     timer = start
-    output = buff.get_text(buff.get_start_iter(), buff.get_end_iter(), False)
+    output = ""
+    
     while timer < start + 0.01:
-        out = cp.stderr.read(1)
+        out = cp.stderr.read(1) # AFNI always erroring for some reason
         # EOF reached
-        if out == '' and p.poll() != None:
+        if out == '' and cp.poll() != None:
             return False
         if out != '':
             output+=str(out.decode("utf-8") )
         timer = time.time()
-    buff.set_text(output, -1)
-    return True
+    # update buffer
+    buff.insert_at_cursor(output, -1)
+    textview.scroll_to_iter(buff.get_end_iter(), 0.1, True, 1, 1)
+    if cp.poll() is not None:
+        return False # destroy GLib reference
+    else:
+        return True
 
-def execute_cmd(cmds, terminal, buff, prj_cwd):
+def execute_cmd(builder, cmds, textview, buff, prj_cwd):
     for i, cmd in enumerate(cmds):
         print("COMMAND "+str(i)+": " + cmd)
-        #cp = SP.run([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True, cwd=project.working_directory)
         cp = SP.Popen([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True, cwd=prj_cwd)        
         # poll till process terminates
-        GLib.timeout_add(200, update_terminal, (cp, terminal, buff))
-        cp.wait()
+        GLib.timeout_add(500, update_terminal, (cp, textview, buff))
+        cp.wait() 
 
-        """
-        if cp.returncode != 0:
-            # pop up warning dialog for non zero return code
-            stderr = cp.stderr.decode(encoding='UTF-8')
-            warning_dialog = builder.get_object('warning_dialog')
-            warning_dialog.set_markup("<b>Warning</b>")
-            warning_dialog.format_secondary_markup(stderr)
-            warning_dialog.show()
-            return 1
-        else:
-            stdout = cp.stdout.decode(encoding='UTF-8')
-        """
-
-def run_module(builder, project, module):
+def generate_cmds(builder, project, module):
+    """ Return array of shell commands to be executed """
     command = module.command
-    
     # concatenate all loop dir selections giving us relative path to execution
     # directory. This is the relative path we pass to the shell at project
     # working directory
@@ -77,15 +69,31 @@ def run_module(builder, project, module):
             m = re.search(regex, exec_dir)
             local_var_values[key] = m[0]
         cmds.append(command.print(exec_dir, local_var_values))
-    pdb.set_trace()
-    terminal = builder.get_object('terminal')
-    buff = builder.get_object('terminal_buff')
+    return cmds  
+
+def run_test(builder, project, module):
+    cmds = generate_cmds(builder, project, module)    
+    terminal = builder.get_object('file_selection_viewer')
+    textview = builder.get_object('file_selection_textview')
+    builder.get_object('fsv_header').set_title('Run Test')
+    builder.get_object('fsv_header').set_subtitle(module.name + '.mod')
+    terminal.show()
+    buff = builder.get_object('file_selection_buffer')
+    # clear buffer
+    buff.set_text("",-1)
     prj_cwd = project.working_directory
-    thread = threading.Thread(target=execute_cmd, args=(cmds, terminal, buff, prj_cwd))
+    thread = threading.Thread(target=execute_cmd, args=(builder, cmds, textview, buff, prj_cwd))
     thread.daemon = True
     thread.start()
 
+def get_loop_file_selection(builder, project, module):
+    builder.get_object('fsv_header').set_title('Loop File Selection')
+    builder.get_object('fsv_header').set_subtitle(module.name)
+    cmds = generate_cmds(builder, project, module)
+    string = ""
+    for cmd in cmds:
+        string += cmd + "\n"
+    return string
 
-
-        
+   
                 

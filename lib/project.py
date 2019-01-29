@@ -7,3 +7,4 @@ class Project:
         self.filename = None
         self.vars = []
         self.working_directory = None
+        self.lib_dir = None

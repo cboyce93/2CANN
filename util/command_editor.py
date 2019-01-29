@@ -1,21 +1,12 @@
-#!/usr/bin/env pythonf
+#!/usr/bin/env python3
 
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
-
-import pdb
-
-""" 
-Command Editor Subs
-
-This file contains all the subs for the command_editor window that we
-want to keep out of the handlers.py file
-    
-"""    
+  
 
 def update_textview(textview, command, tagtable, spinner_index):
-    
+    """ Display command in textview following a change to command """
     # init vars
     command.str = ""
     flag_offsets = []
@@ -106,16 +97,8 @@ def update_textview(textview, command, tagtable, spinner_index):
         #pdb.set_trace()
         # drop last offset in loop since referenced by previous iteration
         for i, offset in enumerate(set_offsets[:-1]):
-            if spinner_index == get_iter_index(command, i) and command.sets[i][5] != 'input':
+            if spinner_index == get_iter_index(command, i):
                 buff.apply_tag_by_name("active_set_tag", 
-                                        buff.get_iter_at_offset(offset),
-                                        buff.get_iter_at_offset(set_offsets[i+1]))
-            elif spinner_index == get_iter_index(command, i) and command.sets[i][5] == 'input':
-                buff.apply_tag_by_name("active_input_set_tag", 
-                                        buff.get_iter_at_offset(offset),
-                                        buff.get_iter_at_offset(set_offsets[i+1]))
-            elif command.sets[i][5] == 'input':
-                buff.apply_tag_by_name("input_set_tag", 
                                         buff.get_iter_at_offset(offset),
                                         buff.get_iter_at_offset(set_offsets[i+1]))
             else:
@@ -226,27 +209,6 @@ def init_tagtable():
     set_tag.props.underline = 0
     set_tag.props.underline_set = True
     
-    # input set tag
-    input_set_tag = Gtk.TextTag.new("input_set_tag")
-    input_set_tag.props.weight = 500
-    input_set_tag.props.scale = 1.3
-    input_set_tag.props.weight_set = True
-    input_set_tag.props.foreground = "blue"
-    input_set_tag.props.underline = 0
-    input_set_tag.props.underline_set = True
-    input_set_tag.props.background = "yellow"
-    
-    # active input set tag
-    active_input_set_tag = Gtk.TextTag.new("active_input_set_tag")
-    active_input_set_tag.props.weight = 700
-    active_input_set_tag.props.scale = 1.3
-    active_input_set_tag.props.weight_set = True
-    active_input_set_tag.props.foreground = "blue"
-    active_input_set_tag.props.underline = 1
-    active_input_set_tag.props.underline_set = True
-    active_input_set_tag.props.background = "yellow"
-    
-    
     tagtable.add(func)
     tagtable.add(active_func)
     tagtable.add(flag)
@@ -255,8 +217,6 @@ def init_tagtable():
     tagtable.add(active_static)
     tagtable.add(set_tag)
     tagtable.add(active_set_tag)
-    tagtable.add(input_set_tag)
-    tagtable.add(active_input_set_tag)
     
     return tagtable
 

@@ -21,18 +21,18 @@ class twoCANN:
         # FOR TEST
         return variables_liststore
         
-    def __init_lib_manager_treeview(self, treeview):
-        lib_liststore = Gtk.ListStore(str, str, str, str, str)
-        treeview.set_model(lib_liststore)
-        for i, col_title in enumerate(["Category", "Name", "Author", "Description", "Filepath"]):
+    def __init_pro_manager_treeview(self, treeview):
+        pro_liststore = Gtk.ListStore(int, str, str)
+        treeview.set_model(pro_liststore)
+        for i, col_title in enumerate(["Step", "Module Name", "State"]):
             renderer = Gtk.CellRendererText()
             column = Gtk.TreeViewColumn(col_title, renderer, text=i)
             column.set_sort_column_id(i)
             treeview.append_column(column)
-            if i == 4:
-                column.set_visible(False)
+            if i == 1:
+                column.set_min_width(200)   # min width for module name
         # FOR TEST
-        return lib_liststore  
+        return pro_liststore  
     
     def __init_loop_manager_treeview(self, treeview):
         loop_liststore = Gtk.ListStore(int, str, str, str)
@@ -55,7 +55,7 @@ class twoCANN:
             treeview.append_column(column)
         # FOR TEST
         return lv_liststore
-
+    
     def __init__(self):
         # Create new project object
         project = Project('Untitled.pro')
@@ -63,10 +63,10 @@ class twoCANN:
         builder = Gtk.Builder.new_from_file('2CANN.glade')
         # Setup treeviews and liststores
         variables_liststore = self.__init_var_manager_treeview(builder.get_object('vm_treeview'))
-        lib_liststore = self.__init_lib_manager_treeview(builder.get_object('lib_treeview'))
+        pro_liststore = self.__init_pro_manager_treeview(builder.get_object('pro_treeview'))
         loop_liststore = self.__init_loop_manager_treeview(builder.get_object('loop_treeview'))
         loop_viewer_liststore = self.__init_loop_viewer_treeview(builder.get_object('loop_viewer_treeview'))
-        liststores = (variables_liststore, lib_liststore, loop_liststore, loop_viewer_liststore)
+        liststores = (variables_liststore, pro_liststore, loop_liststore, loop_viewer_liststore)
         # build tag table for command editor Gtk.TextView for different
         # text styles
         tagtable = init_tagtable()

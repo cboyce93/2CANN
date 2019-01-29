@@ -100,7 +100,8 @@ def build_directory_set(builder, project, dir_exp, file_sel, local_var_regexes, 
         return dir_set
     
 
-def view_loop(builder, project, liststore, local_var, dir_selection):
+def view_loop_directories(builder, project, liststore, local_var, dir_selection):
+    """ Populate Loop Viewer treeview with currently selected loop directories """
     pdb.set_trace()
     # split by directory level
     # replace global variables with user values
@@ -153,13 +154,8 @@ def view_loop(builder, project, liststore, local_var, dir_selection):
             if m is not None:
                 liststore.append([m[0], line])
         return
-"""
-self.module.command.loops.append([loop_no,
-                                    var,
-                                    get_local_var_value(dir_selection),
-                                    dir_selection])
-                                    """
-def view_looper(builder, project, loops):
+
+def view_loop_directories(builder, project, loops):
     treeview = builder.get_object('loop_viewer_treeview')
     # clear out columns from last build
     for col in treeview.get_columns():
@@ -249,18 +245,4 @@ def view_looper(builder, project, loops):
                 liststore_row.append("N/A")
             lv_liststore.append(liststore_row)
         return
-    
-    
-    
-    
-
-
-
-       
-
-            
-    
-    
-    
-    
     

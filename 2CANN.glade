@@ -42,119 +42,17 @@ Author: Cameron Boyce
     <property name="can_focus">False</property>
     <property name="stock">gtk-directory</property>
   </object>
-  <object class="GtkListStore" id="editor_store"/>
   <object class="GtkImage" id="export">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-revert-to-saved</property>
   </object>
   <object class="GtkTextBuffer" id="file_selection_buffer"/>
-  <object class="GtkWindow" id="file_selection_viewer">
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">File Selection Viewer</property>
-    <property name="default_width">440</property>
-    <property name="icon">img/icon.png</property>
-    <signal name="delete-event" handler="close" swapped="no"/>
-    <child>
-      <placeholder/>
-    </child>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkHeaderBar">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="title" translatable="yes">File Selection Viewer</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkScrolledWindow">
-            <property name="width_request">400</property>
-            <property name="height_request">200</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <child>
-              <object class="GtkTextView" id="file_selection_textview">
-                <property name="name">200</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="pixels_below_lines">2</property>
-                <property name="editable">False</property>
-                <property name="left_margin">12</property>
-                <property name="right_margin">12</property>
-                <property name="top_margin">12</property>
-                <property name="bottom_margin">12</property>
-                <property name="cursor_visible">False</property>
-                <property name="buffer">file_selection_buffer</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="margin_right">20</property>
-            <property name="margin_top">12</property>
-            <property name="margin_bottom">12</property>
-            <property name="spacing">10</property>
-            <child>
-              <object class="GtkButton">
-                <property name="label">gtk-close</property>
-                <property name="name">1</property>
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="close_button" object="file_selection_viewer" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkWindow" id="function_editor">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Function Editor</property>
     <property name="resizable">False</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">400</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon">img/icon.png</property>
@@ -286,16 +184,10 @@ Author: Cameron Boyce
     <property name="stock">gtk-jump-to</property>
     <property name="icon_size">1</property>
   </object>
-  <object class="GtkEntryCompletion" id="mod_cat_completion">
-    <property name="text_column">1</property>
-  </object>
-  <object class="GtkTextBuffer" id="terminal_buff"/>
   <object class="GtkWindow" id="wrapper">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">2CANN</property>
     <property name="window_position">center</property>
-    <property name="default_width">1000</property>
-    <property name="default_height">600</property>
     <property name="icon">img/icon.png</property>
     <signal name="delete-event" handler="exit" swapped="no"/>
     <child type="titlebar">
@@ -303,6 +195,8 @@ Author: Cameron Boyce
     </child>
     <child>
       <object class="GtkBox">
+        <property name="width_request">500</property>
+        <property name="height_request">400</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
@@ -310,6 +204,10 @@ Author: Cameron Boyce
           <object class="GtkHeaderBar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="margin_top">12</property>
+            <property name="margin_bottom">6</property>
+            <property name="title" translatable="yes">Project Editor</property>
+            <property name="subtitle" translatable="yes">Untitled.pro*</property>
             <property name="spacing">0</property>
             <child>
               <object class="GtkMenuBar">
@@ -423,29 +321,6 @@ Author: Cameron Boyce
                   <object class="GtkMenuItem">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">View</property>
-                    <property name="use_underline">True</property>
-                    <child type="submenu">
-                      <object class="GtkMenu">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <child>
-                          <object class="GtkImageMenuItem">
-                            <property name="label" translatable="yes">Logs</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="image">img_select_all</property>
-                            <property name="use_stock">False</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkMenuItem">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">_Tools</property>
                     <property name="use_underline">True</property>
                     <child type="submenu">
@@ -460,6 +335,15 @@ Author: Cameron Boyce
                             <property name="image">img_variable_manager</property>
                             <property name="use_stock">False</property>
                             <signal name="activate" handler="on_variable_manager_activated" object="variable_manager" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkImageMenuItem">
+                            <property name="label" translatable="yes">View Logs</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="image">img_select_all</property>
+                            <property name="use_stock">False</property>
                           </object>
                         </child>
                         <child>
@@ -510,471 +394,168 @@ Author: Cameron Boyce
           </packing>
         </child>
         <child>
-          <object class="GtkPaned">
+          <object class="GtkToolbar">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="position">500</property>
-            <property name="wide_handle">True</property>
+            <property name="can_focus">False</property>
+            <property name="toolbar_style">icons</property>
+            <property name="icon_size">2</property>
             <child>
-              <object class="GtkPaned">
+              <object class="GtkToolButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="orientation">vertical</property>
-                <property name="position">300</property>
-                <property name="wide_handle">True</property>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_top">10</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="label" translatable="yes">Project Editor</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolbar">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="toolbar_style">icons</property>
-                        <property name="icon_size">2</property>
-                        <child>
-                          <object class="GtkToolButton">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_markup" translatable="yes">&lt;b&gt;Run All&lt;/b&gt;: Run all modules in the pipeline.</property>
-                            <property name="use_underline">True</property>
-                            <property name="stock_id">gtk-goto-last</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkToolButton">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_markup" translatable="yes">&lt;b&gt;Run Next&lt;/b&gt;: Run next module in queue.</property>
-                            <property name="use_underline">True</property>
-                            <property name="stock_id">gtk-go-forward</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSeparatorToolItem">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkToolButton">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit Pipeline Module&lt;/b&gt;: Open command editor to change module command and/or passed arguments.</property>
-                            <property name="use_underline">True</property>
-                            <property name="stock_id">gtk-edit</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkToolButton">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete Module&lt;/b&gt;: Delete an unprocessed module from the pipeline.</property>
-                            <property name="use_underline">True</property>
-                            <property name="stock_id">gtk-delete</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSeparatorToolItem">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkToolButton">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_markup" translatable="yes">&lt;b&gt;Move to Top&lt;/b&gt;: Move module to top of queue.</property>
-                            <property name="use_underline">True</property>
-                            <property name="stock_id">gtk-goto-top</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkToolButton">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_markup" translatable="yes">&lt;b&gt;Move Up&lt;/b&gt;: Move module up in queue by one position.</property>
-                            <property name="use_underline">True</property>
-                            <property name="stock_id">gtk-go-up</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkToolButton">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_markup" translatable="yes">&lt;b&gt;Move Down&lt;/b&gt;: Move module down in queue by one position.</property>
-                            <property name="use_underline">True</property>
-                            <property name="stock_id">gtk-go-down</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkToolButton">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_markup" translatable="yes">&lt;b&gt;Move to Bottom&lt;/b&gt;: Move module to last position in queue.</property>
-                            <property name="use_underline">True</property>
-                            <property name="stock_id">gtk-goto-bottom</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="homogeneous">True</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkScrolledWindow">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <child>
-                          <object class="GtkTreeView" id="editor">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="model">editor_store</property>
-                            <child internal-child="selection">
-                              <object class="GtkTreeSelection"/>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn">
-                                <property name="min_width">30</property>
-                                <property name="title" translatable="yes">Step</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn">
-                                <property name="min_width">100</property>
-                                <property name="title" translatable="yes">Module</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkTreeViewColumn">
-                                <property name="min_width">100</property>
-                                <property name="title" translatable="yes">State</property>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="resize">False</property>
-                    <property name="shrink">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="margin_left">20</property>
-                        <property name="label" translatable="yes">Terminal Output</property>
-                        <property name="use_markup">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSeparator">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSeparator">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkScrolledWindow">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <child>
-                          <object class="GtkTextView" id="terminal">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="hscroll_policy">natural</property>
-                            <property name="vscroll_policy">natural</property>
-                            <property name="editable">False</property>
-                            <property name="cursor_visible">False</property>
-                            <property name="buffer">terminal_buff</property>
-                            <property name="accepts_tab">False</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="resize">True</property>
-                    <property name="shrink">True</property>
-                  </packing>
-                </child>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Run All&lt;/b&gt;</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-media-play</property>
               </object>
               <packing>
-                <property name="resize">False</property>
-                <property name="shrink">True</property>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkSeparatorToolItem">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">10</property>
-                    <property name="margin_bottom">5</property>
-                    <property name="label" translatable="yes">Library Manager</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolbar">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="toolbar_style">icons</property>
-                    <property name="icon_size">2</property>
-                    <child>
-                      <object class="GtkToolButton">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_markup" translatable="yes">&lt;b&gt;Add Module to Pipeline&lt;/b&gt;: Add library module to project pipeline, next in queue.</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-add</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="homogeneous">True</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorToolItem">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="homogeneous">True</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_markup" translatable="yes">&lt;b&gt;New Module&lt;/b&gt;: Create a new module.</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-new</property>
-                        <signal name="clicked" handler="on_new_module_clicked" object="module_editor" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="homogeneous">True</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit Module&lt;/b&gt;: Edit a module in the library.</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-edit</property>
-                        <signal name="clicked" handler="on_editor_module_clicked" object="module_editor" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="homogeneous">True</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete Module&lt;/b&gt;: Delete a module from the library.</property>
-                        <property name="label" translatable="yes">toolbutton</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-delete</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="homogeneous">True</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorToolItem">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="homogeneous">True</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToolButton">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_markup" translatable="yes">&lt;b&gt;Go to&lt;/b&gt;: Open module reference URL.</property>
-                        <property name="use_underline">True</property>
-                        <property name="stock_id">gtk-info</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="homogeneous">True</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSearchBar">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="search_mode_enabled">True</property>
-                    <child>
-                      <object class="GtkSearchEntry">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="primary_icon_name">edit-find-symbolic</property>
-                        <property name="primary_icon_activatable">False</property>
-                        <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">Search modules...</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkScrolledWindow">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <child>
-                      <object class="GtkTreeView" id="lib_treeview">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <child internal-child="selection">
-                          <object class="GtkTreeSelection" id="lib_man_selection">
-                            <signal name="changed" handler="on_lib_manager_selection_changed" swapped="no"/>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
               </object>
               <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;New Module&lt;/b&gt;</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-new</property>
+                <signal name="clicked" handler="on_new_module_clicked" object="module_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit Module&lt;/b&gt;</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-edit</property>
+                <signal name="clicked" handler="on_editor_module_clicked" object="module_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete Module&lt;/b&gt;</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-delete</property>
+                <signal name="clicked" handler="on_delete_module_clicked" object="message_dialog" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Reference&lt;/b&gt;</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-info</property>
+                <signal name="clicked" handler="on_open_module_ref_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;View Log&lt;/b&gt;</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-select-all</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Move Up&lt;/b&gt;</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-go-up</property>
+                <signal name="clicked" handler="on_move_up_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Move Down&lt;/b&gt;</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-go-down</property>
+                <signal name="clicked" handler="on_move_down_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <child>
+              <object class="GtkTreeView" id="pro_treeview">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection">
+                    <signal name="changed" handler="on_pro_manager_selection_changed" swapped="no"/>
+                  </object>
+                </child>
+              </object>
             </child>
           </object>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
@@ -982,7 +563,7 @@ Author: Cameron Boyce
   </object>
   <object class="GtkAboutDialog" id="about_dialog">
     <property name="can_focus">False</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-on-parent</property>
     <property name="icon">img/icon.png</property>
     <property name="type_hint">dialog</property>
     <property name="transient_for">wrapper</property>
@@ -1026,15 +607,510 @@ Naail Khan</property>
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="module_editor">
+  <object class="GtkMessageDialog" id="message_dialog">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Module Editor</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon">img/icon.png</property>
+    <property name="type_hint">dialog</property>
+    <property name="transient_for">wrapper</property>
+    <property name="message_type">question</property>
+    <property name="buttons">yes-no</property>
+    <signal name="response" handler="on_mess_dialog_response" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="homogeneous">True</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="preferences_manager">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Preferences Editor</property>
     <property name="resizable">False</property>
+    <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon">img/icon.png</property>
     <property name="transient_for">wrapper</property>
     <signal name="delete-event" handler="close" swapped="no"/>
-    <signal name="focus-in-event" handler="on_module_editor_focus_in_event" object="module_command_entry" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkHeaderBar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="title" translatable="yes">2CANN Preferences</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">center</property>
+            <property name="margin_left">40</property>
+            <property name="margin_right">20</property>
+            <property name="row_spacing">10</property>
+            <property name="column_spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">&lt;b&gt;Library Database:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFileChooserButton">
+                <property name="width_request">250</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="action">select-folder</property>
+                <property name="create_folders">False</property>
+                <property name="filter">db_filter</property>
+                <property name="title" translatable="yes">Modules Directory</property>
+                <signal name="file-set" handler="on_lib_dir_chooser_file_set" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">&lt;b&gt;Working Directory:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFileChooserButton" id="work_dir_chooser">
+                <property name="width_request">250</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="action">select-folder</property>
+                <property name="title" translatable="yes">Select Working Directory</property>
+                <signal name="file-set" handler="on_work_dir_chooser_file_set" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">end</property>
+            <property name="margin_right">20</property>
+            <property name="margin_bottom">12</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-ok</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="close_button" object="preferences_manager" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="variable_manager">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Variable Manager</property>
+    <property name="resizable">False</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon">img/icon.png</property>
+    <property name="transient_for">wrapper</property>
+    <signal name="delete-event" handler="close" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">center</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkHeaderBar" id="vm_header">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="title" translatable="yes">Global Variable Manager</property>
+            <signal name="delete-event" handler="close" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToolbar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;New Variable&lt;/b&gt;</property>
+                <property name="label" translatable="yes">__glade_unnamed_157</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-new</property>
+                <signal name="clicked" handler="on_new_variable_clicked" object="variable_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit Variable&lt;/b&gt;</property>
+                <property name="label" translatable="yes">__glade_unnamed_158</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-edit</property>
+                <signal name="clicked" handler="on_edit_variable_clicked" object="variable_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete Variable&lt;/b&gt;</property>
+                <property name="label" translatable="yes">__glade_unnamed_159</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-delete</property>
+                <signal name="clicked" handler="on_del_variable_clicked" object="variable_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTreeView" id="vm_treeview">
+            <property name="width_request">300</property>
+            <property name="height_request">140</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <child internal-child="selection">
+              <object class="GtkTreeSelection" id="vm_treeview_selection"/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">end</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">12</property>
+            <property name="margin_bottom">12</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-ok</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_vm_ok_button_clicked" object="variable_manager" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="variable_editor">
+    <property name="name">variable_editor</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Variable Editor</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon">img/icon.png</property>
+    <property name="transient_for">variable_manager</property>
+    <signal name="delete-event" handler="close" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkHeaderBar" id="ve_header">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="title" translatable="yes">Global Variable Editor</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_left">20</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">12</property>
+            <property name="row_spacing">10</property>
+            <property name="column_spacing">5</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">&lt;b&gt;Name:&lt;/b&gt;  ${</property>
+                <property name="use_markup">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">&lt;b&gt;File Selection:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="ve_file_selection_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="max_width_chars">40</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkEntry" id="ve_name_entry">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="max_length">20</property>
+                    <property name="width_chars">20</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">}</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">end</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">12</property>
+            <property name="margin_bottom">12</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-cancel</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="close_button" object="variable_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-ok</property>
+                <property name="name">1</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_ve_ok_button_clicked" object="variable_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkEntryCompletion" id="mod_cat_completion">
+    <property name="text_column">1</property>
+  </object>
+  <object class="GtkTextBuffer" id="mod_notes_buff"/>
+  <object class="GtkWindow" id="module_editor">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Module Editor</property>
+    <property name="resizable">False</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon">img/icon.png</property>
+    <property name="transient_for">wrapper</property>
+    <signal name="delete-event" handler="close" swapped="no"/>
     <child type="titlebar">
       <placeholder/>
     </child>
@@ -1064,36 +1140,8 @@ Naail Khan</property>
             <property name="margin_left">40</property>
             <property name="margin_right">20</property>
             <property name="margin_top">10</property>
-            <property name="margin_bottom">15</property>
             <property name="row_spacing">10</property>
             <property name="column_spacing">10</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;b&gt;Category:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-                <property name="justify">right</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;b&gt;Author:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
@@ -1105,119 +1153,6 @@ Naail Khan</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;b&gt;Description:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="module_description_entry">
-                <property name="width_request">300</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="max_length">140</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;Documentation URL:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="module_url_entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="max_length">1000</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;b&gt;Command:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="module_command_entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="editable">False</property>
-                <property name="max_length">1000</property>
-                <property name="placeholder_text" translatable="yes">Open cmd editor...</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="label" translatable="yes">Command Editor...</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_cmd_editor_clicked" object="command_editor" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">2</property>
-                <property name="top_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkEntry" id="module_category_search_entry">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="max_length">20</property>
-                    <property name="completion">mod_cat_completion</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
               </packing>
             </child>
@@ -1230,6 +1165,7 @@ Naail Khan</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="max_length">15</property>
+                    <property name="input_purpose">name</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1240,6 +1176,30 @@ Naail Khan</property>
                 <child>
                   <placeholder/>
                 </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">&lt;b&gt;Reference URL:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="module_url_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="max_length">1000</property>
+                <property name="input_purpose">url</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -1247,24 +1207,26 @@ Naail Khan</property>
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkEntry" id="module_author_entry">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="max_length">15</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">&lt;b&gt;Command:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="module_command_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="editable">False</property>
+                <property name="max_length">1000</property>
+                <property name="width_chars">50</property>
+                <property name="placeholder_text" translatable="yes">Open cmd editor...</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -1272,10 +1234,54 @@ Naail Khan</property>
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">Command Editor...</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_cmd_editor_clicked" object="command_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="top_attach">2</property>
+              </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">&lt;b&gt;Notes:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="height_request">150</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTextView" id="module_notes_textview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="pixels_below_lines">1</property>
+                    <property name="wrap_mode">word</property>
+                    <property name="left_margin">1</property>
+                    <property name="right_margin">1</property>
+                    <property name="top_margin">1</property>
+                    <property name="bottom_margin">1</property>
+                    <property name="buffer">mod_notes_buff</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">3</property>
+              </packing>
             </child>
             <child>
               <placeholder/>
@@ -1300,6 +1306,7 @@ Naail Khan</property>
             <property name="can_focus">False</property>
             <property name="halign">end</property>
             <property name="margin_right">20</property>
+            <property name="margin_top">1</property>
             <property name="margin_bottom">12</property>
             <property name="spacing">10</property>
             <child>
@@ -1320,15 +1327,15 @@ Naail Khan</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="save_module_button">
-                <property name="label">gtk-save</property>
+              <object class="GtkButton" id="foe_ok_button2">
+                <property name="label">gtk-ok</property>
                 <property name="width_request">100</property>
                 <property name="height_request">30</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_save_module_button_clicked" swapped="no"/>
+                <signal name="clicked" handler="on_new_module_ok_button_clicked" object="module_editor" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1350,7 +1357,7 @@ Naail Khan</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Command Editor</property>
     <property name="resizable">False</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">700</property>
     <property name="default_height">200</property>
     <property name="destroy_with_parent">True</property>
@@ -1399,7 +1406,7 @@ Naail Khan</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">&lt;b&gt;Edit Loop&lt;/b&gt;</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit Loop&lt;/b&gt;</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-edit</property>
               </object>
@@ -1412,7 +1419,7 @@ Naail Khan</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">&lt;b&gt;Delete Loop&lt;/b&gt;</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete Loop&lt;/b&gt;</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-delete</property>
               </object>
@@ -1435,10 +1442,26 @@ Naail Khan</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">View</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Loop Directories&lt;/b&gt;</property>
+                <property name="label" translatable="yes">Loop Directories</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-select-all</property>
-                <signal name="clicked" handler="ce_on_view_loop_clicked" object="loop_viewer" swapped="no"/>
+                <property name="stock_id">gtk-directory</property>
+                <signal name="clicked" handler="ce_on_loop_directories_clicked" object="loop_viewer" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Loop File Selection&lt;/b&gt;</property>
+                <property name="label" translatable="yes">Loop File Selection</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-print-preview</property>
+                <signal name="clicked" handler="ce_on_loop_file_sel_clicked" object="file_selection_viewer" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1459,10 +1482,11 @@ Naail Khan</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Run Test&lt;/b&gt;</property>
                 <property name="label" translatable="yes">__glade_unnamed_201</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-media-play</property>
-                <signal name="clicked" handler="ce_on_run_clicked" swapped="no"/>
+                <signal name="clicked" handler="ce_on_run_test_clicked" object="file_selection_viewer" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1549,7 +1573,7 @@ Naail Khan</property>
                   <object class="GtkToolButton">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Function:&lt;/b&gt; Insert function into command.</property>
+                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Add Function&lt;/b&gt;</property>
                     <property name="label" translatable="yes">func</property>
                     <property name="use_underline">True</property>
                     <signal name="clicked" handler="on_add_function_clicked" object="function_editor" swapped="no"/>
@@ -1573,7 +1597,7 @@ Naail Khan</property>
                   <object class="GtkToolButton">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Standard Option:&lt;/b&gt; Insert standard option into command.</property>
+                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Add Flag&lt;/b&gt;</property>
                     <property name="label" translatable="yes">flag</property>
                     <property name="use_underline">True</property>
                     <signal name="clicked" handler="on_add_flag_option_clicked" object="flag_option_editor" swapped="no"/>
@@ -1587,7 +1611,7 @@ Naail Khan</property>
                   <object class="GtkToolButton">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Static Option:&lt;/b&gt; Insert static option into command.</property>
+                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Add Static Option&lt;/b&gt;</property>
                     <property name="label" translatable="yes">static</property>
                     <property name="use_underline">True</property>
                     <signal name="clicked" handler="on_add_static_option_clicked" object="static_option_editor" swapped="no"/>
@@ -1601,7 +1625,7 @@ Naail Khan</property>
                   <object class="GtkToolButton">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Iterative Option:&lt;/b&gt; Insert iterative option into command.</property>
+                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Add Set Option&lt;/b&gt;</property>
                     <property name="label" translatable="yes">set</property>
                     <property name="use_underline">True</property>
                     <signal name="clicked" handler="on_add_set_option_clicked" object="set_option_editor" swapped="no"/>
@@ -1625,7 +1649,7 @@ Naail Khan</property>
                   <object class="GtkToolButton" id="ce_edit_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit:&lt;/b&gt; Change selected function/option parameters.</property>
+                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit&lt;/b&gt;</property>
                     <property name="label" translatable="yes">__glade_unnamed_133</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-edit</property>
@@ -1640,7 +1664,7 @@ Naail Khan</property>
                   <object class="GtkToolButton">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete:&lt;/b&gt; Remove selected function/option from command.</property>
+                    <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete&lt;/b&gt;</property>
                     <property name="label" translatable="yes">__glade_unnamed_134</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-delete</property>
@@ -1667,7 +1691,7 @@ Naail Khan</property>
         </child>
         <child>
           <object class="GtkScrolledWindow">
-            <property name="height_request">200</property>
+            <property name="height_request">160</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
@@ -1693,9 +1717,48 @@ Naail Khan</property>
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator">
+          <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="halign">end</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">12</property>
+            <property name="margin_bottom">12</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-cancel</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="close_button" object="command_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="foe_ok_button3">
+                <property name="label">gtk-ok</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_ce_ok_button_clicked" object="command_editor" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1703,15 +1766,110 @@ Naail Khan</property>
             <property name="position">6</property>
           </packing>
         </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="file_selection_viewer">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">File Selection Viewer</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="default_width">440</property>
+    <property name="icon">img/icon.png</property>
+    <property name="transient_for">command_editor</property>
+    <signal name="delete-event" handler="close" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkLabel" id="ce_selection_status">
+          <object class="GtkHeaderBar" id="fsv_header">
+            <property name="width_request">600</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="title" translatable="yes">File Selection Viewer</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="width_request">650</property>
+            <property name="height_request">350</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="kinetic_scrolling">False</property>
+            <child>
+              <object class="GtkTextView" id="file_selection_textview">
+                <property name="name">200</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="pixels_below_lines">2</property>
+                <property name="editable">False</property>
+                <property name="left_margin">12</property>
+                <property name="right_margin">12</property>
+                <property name="top_margin">12</property>
+                <property name="bottom_margin">12</property>
+                <property name="cursor_visible">False</property>
+                <property name="buffer">file_selection_buffer</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">7</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">end</property>
+            <property name="margin_right">20</property>
+            <property name="margin_top">12</property>
+            <property name="margin_bottom">12</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-close</property>
+                <property name="name">1</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="close_button" object="file_selection_viewer" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
@@ -1721,6 +1879,7 @@ Naail Khan</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Flag Option Editor</property>
     <property name="resizable">False</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">400</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon">img/icon.png</property>
@@ -1841,7 +2000,7 @@ Naail Khan</property>
   <object class="GtkWindow" id="loop_editor">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Loop Viewer</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-on-parent</property>
     <property name="icon">img/icon.png</property>
     <property name="transient_for">command_editor</property>
     <child type="titlebar">
@@ -1897,19 +2056,6 @@ Naail Khan</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
-                <property name="label" translatable="yes">View Loop...</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_view_loop_clicked" object="loop_viewer" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">4</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkEntry" id="le_var_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1956,9 +2102,6 @@ Naail Khan</property>
                 <property name="left_attach">3</property>
                 <property name="top_attach">1</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
             </child>
             <child>
               <placeholder/>
@@ -2030,8 +2173,10 @@ Naail Khan</property>
     <property name="width_request">650</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Loop Viewer</property>
+    <property name="window_position">center-on-parent</property>
     <property name="icon">img/icon.png</property>
-    <property name="transient_for">loop_editor</property>
+    <property name="gravity">center</property>
+    <property name="transient_for">command_editor</property>
     <child>
       <placeholder/>
     </child>
@@ -2041,7 +2186,7 @@ Naail Khan</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkHeaderBar">
+          <object class="GtkHeaderBar" id="lv_header">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="title" translatable="yes">Loop Viewer</property>
@@ -2113,6 +2258,7 @@ Naail Khan</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Set Option Editor</property>
     <property name="resizable">False</property>
+    <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon">img/icon.png</property>
     <property name="transient_for">command_editor</property>
@@ -2188,73 +2334,6 @@ Naail Khan</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;Selection Tags:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkRadioButton" id="se_radio_none">
-                    <property name="label" translatable="yes">None</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="se_radio_input">
-                    <property name="label" translatable="yes">Input</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">se_radio_none</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="se_radio_output">
-                    <property name="label" translatable="yes">Output</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">se_radio_none</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">&lt;b&gt;File Selection:&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
@@ -2276,19 +2355,6 @@ Naail Khan</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
-                <property name="label" translatable="yes">View Selection...</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_ioe_view_selection_button_clicked" object="file_selection_viewer" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">2</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -2305,8 +2371,8 @@ Naail Khan</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkRadioButton" id="se_radio_file">
-                    <property name="label" translatable="yes">File</property>
+                  <object class="GtkRadioButton" id="se_relative">
+                    <property name="label" translatable="yes">Relative</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
@@ -2320,13 +2386,13 @@ Naail Khan</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkRadioButton" id="se_radio_directory">
-                    <property name="label" translatable="yes">Directory</property>
+                  <object class="GtkRadioButton" id="se_absolute">
+                    <property name="label" translatable="yes">Absolute</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
-                    <property name="group">se_radio_file</property>
+                    <property name="group">se_relative</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2339,88 +2405,6 @@ Naail Khan</property>
                 <property name="left_attach">1</property>
                 <property name="top_attach">1</property>
               </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;b&gt;Matching:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkRadioButton" id="se_match_none">
-                    <property name="label" translatable="yes">None</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="se_match_source">
-                    <property name="label" translatable="yes">Source</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">se_match_none</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="se_match_clone">
-                    <property name="label" translatable="yes">Clone</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">se_match_none</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
           <packing>
@@ -2485,6 +2469,7 @@ Naail Khan</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Static Option Editor</property>
     <property name="resizable">False</property>
+    <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon">img/icon.png</property>
     <property name="transient_for">command_editor</property>
@@ -2641,7 +2626,7 @@ Naail Khan</property>
   </object>
   <object class="GtkMessageDialog" id="info_dialog">
     <property name="can_focus">False</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <property name="transient_for">module_editor</property>
     <property name="buttons">ok</property>
@@ -2677,7 +2662,7 @@ Naail Khan</property>
   </object>
   <object class="GtkMessageDialog" id="warning_dialog">
     <property name="can_focus">False</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-on-parent</property>
     <property name="icon">img/icon.png</property>
     <property name="type_hint">dialog</property>
     <property name="transient_for">module_editor</property>
@@ -2713,456 +2698,5 @@ Naail Khan</property>
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="preferences_manager">
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Preferences Editor</property>
-    <property name="resizable">False</property>
-    <property name="window_position">center</property>
-    <property name="default_width">440</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="icon">img/icon.png</property>
-    <property name="transient_for">wrapper</property>
-    <signal name="delete-event" handler="close" swapped="no"/>
-    <child>
-      <placeholder/>
-    </child>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">10</property>
-        <child>
-          <object class="GtkHeaderBar">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="title" translatable="yes">2CANN Preferences</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkGrid">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">center</property>
-            <property name="row_spacing">10</property>
-            <property name="column_spacing">10</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;Library Database:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFileChooserButton">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="create_folders">False</property>
-                <property name="filter">db_filter</property>
-                <property name="title" translatable="yes">Select Library Database</property>
-                <property name="width_chars">30</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;Working Directory:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFileChooserButton" id="work_dir_chooser">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="action">select-folder</property>
-                <property name="title" translatable="yes">Select Working Directory</property>
-                <signal name="file-set" handler="on_work_dir_chooser_file_set" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="margin_right">20</property>
-            <property name="margin_bottom">12</property>
-            <property name="spacing">10</property>
-            <child>
-              <object class="GtkButton">
-                <property name="label">gtk-ok</property>
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="close_button" object="preferences_manager" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="variable_manager">
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Variable Manager</property>
-    <property name="resizable">False</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="icon">img/icon.png</property>
-    <property name="transient_for">wrapper</property>
-    <signal name="delete-event" handler="close" swapped="no"/>
-    <child>
-      <placeholder/>
-    </child>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="halign">center</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkHeaderBar" id="vm_header">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="title" translatable="yes">Variable Manager</property>
-            <signal name="delete-event" handler="close" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolbar">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkToolButton">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_markup" translatable="yes">&lt;b&gt;New Variable&lt;/b&gt;</property>
-                <property name="label" translatable="yes">__glade_unnamed_157</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-new</property>
-                <signal name="clicked" handler="on_new_variable_clicked" object="variable_editor" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit Variable&lt;/b&gt;</property>
-                <property name="label" translatable="yes">__glade_unnamed_158</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-edit</property>
-                <signal name="clicked" handler="on_edit_variable_clicked" object="variable_editor" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete Variable&lt;/b&gt;</property>
-                <property name="label" translatable="yes">__glade_unnamed_159</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-delete</property>
-                <signal name="clicked" handler="on_del_variable_clicked" object="variable_editor" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkTreeView" id="vm_treeview">
-            <property name="width_request">300</property>
-            <property name="height_request">140</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <child internal-child="selection">
-              <object class="GtkTreeSelection" id="vm_treeview_selection"/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="margin_right">20</property>
-            <property name="margin_top">12</property>
-            <property name="margin_bottom">12</property>
-            <property name="spacing">10</property>
-            <child>
-              <object class="GtkButton">
-                <property name="label">gtk-ok</property>
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_vm_ok_button_clicked" object="variable_manager" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="variable_editor">
-    <property name="name">variable_editor</property>
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Variable Editor</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="icon">img/icon.png</property>
-    <property name="transient_for">variable_manager</property>
-    <signal name="delete-event" handler="close" swapped="no"/>
-    <child>
-      <placeholder/>
-    </child>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkHeaderBar" id="ve_header">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="title" translatable="yes">Variable Editor</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkGrid">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">20</property>
-            <property name="margin_right">20</property>
-            <property name="margin_top">12</property>
-            <property name="row_spacing">10</property>
-            <property name="column_spacing">5</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;b&gt;Name:&lt;/b&gt;  ${</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">&lt;b&gt;File Selection:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="ve_file_selection_entry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="max_width_chars">40</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="spacing">5</property>
-                <child>
-                  <object class="GtkEntry" id="ve_name_entry">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="max_length">20</property>
-                    <property name="width_chars">20</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">}</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">end</property>
-            <property name="margin_right">20</property>
-            <property name="margin_top">12</property>
-            <property name="margin_bottom">12</property>
-            <property name="spacing">10</property>
-            <child>
-              <object class="GtkButton">
-                <property name="label">gtk-cancel</property>
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="close_button" object="variable_editor" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="label">gtk-ok</property>
-                <property name="name">1</property>
-                <property name="width_request">100</property>
-                <property name="height_request">30</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_ve_ok_button_clicked" object="variable_editor" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
+  <object class="GtkTextBuffer" id="terminal_buff"/>
 </interface>

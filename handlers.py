@@ -2,7 +2,9 @@
 
 import gi
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
+
+from copy import deepcopy
 
 from lib.module import Module
 from lib.command import Command
@@ -70,33 +72,74 @@ class Handler:
     ########################################
     
     def on_new_module_clicked(self, module_editor):
+        self.edit = False
         self.builder.get_object('module_editor_header').set_title('New Module')
         # clear the entries
-        self.builder.get_object('module_category_search_entry').set_text("")
         self.builder.get_object('module_name_entry').set_text("")
-        self.builder.get_object('module_author_entry').set_text("")
-        self.builder.get_object('module_description_entry').set_text("")
         self.builder.get_object('module_url_entry').set_text("")
         self.builder.get_object('module_command_entry').set_text("")
+        self.builder.get_object('mod_notes_buff').set_text("",-1)
         # Create new Module object
         self.module = Module()
         module_editor.show()
     
     def on_editor_module_clicked(self, module_editor):
+        self.edit = True
         self.builder.get_object('module_editor_header').set_title('Edit Module')
-        self.builder.get_object('module_category_search_entry').set_text(self.module.category)
         self.builder.get_object('module_name_entry').set_text(self.module.name)
-        self.builder.get_object('module_author_entry').set_text(self.module.author)
-        self.builder.get_object('module_description_entry').set_text(self.module.desc)
-        self.builder.get_object('module_url_entry').set_text(self.module.url)
-        self.builder.get_object('module_command_entry').set_text("")
+        self.builder.get_object('module_url_entry').set_text(self.module.uri)
+        self.builder.get_object('module_command_entry').set_text(self.module.command.str)
+        self.builder.get_object('mod_notes_buff').set_text(self.module.notes)
         module_editor.show()
     
-    def on_lib_manager_selection_changed(self, selection):
-        #pdb.set_trace()
+    def on_delete_module_clicked(self, message_dialog):
+        message_dialog.set_markup("<b>Warning</b>")
+        message_dialog.format_secondary_markup("Are you sure you want to delete " + self.module.name + ".mod?")
+        message_dialog.show()
+    
+    def on_mess_dialog_response(self, message_dialog, response):
+        if response == -8:
+            # delete module
+            self.modules.remove(self.module)
+            self.pro_liststore.remove(self.current_pro_liststore_iter)
+            self.reset_step_indices()
+            self.step -= 1 
+        message_dialog.hide()
+    
+    def on_open_module_ref_clicked(self, warning_dialog):
+        Gtk.show_uri_on_window(None, self.module.uri, Gdk.CURRENT_TIME)
+    
+    def on_view_log_clicked(self, data=None):
+        pass
+    
+    def on_move_up_clicked(self, data=None):
+        """ Move selected module up one position in queue """
+        iterr = self.current_pro_liststore_iter
+        index = self.pro_liststore.get_value(iterr, 0)-1
+        if index >= 0 and index < len(self.modules):
+            self.pro_liststore.swap(self.modules[index-1].iter, iterr)
+        self.modules.remove(self.module)
+        self.modules.insert(index-1, self.module)
+        # reset step indices
+        self.reset_step_indices()
+    
+    def on_move_down_clicked(self, data=None):
+        """ Move selected module down one position in queue """
+        iterr = self.current_pro_liststore_iter
+        index = self.pro_liststore.get_value(iterr, 0)-1
+        if index >= 0 and index < len(self.modules):
+            self.pro_liststore.swap(self.modules[index+1].iter, iterr)
+        self.modules.remove(self.module)
+        self.modules.insert(index+1, self.module)
+        # reset step indices
+        self.reset_step_indices()       
+    
+    def on_pro_manager_selection_changed(self, selection):
         model, iterr = selection.get_selected()
-        fp = model.get_value(iterr, 4)
-        self.module = load_module(fp)
+        self.current_pro_liststore_iter = iterr
+        if iterr is not None:
+            index = model.get_value(iterr, 0)-1
+            self.module = self.modules[index]
         
         
     ###################################
@@ -136,7 +179,10 @@ class Handler:
     ###################################
     
     def on_work_dir_chooser_file_set(self, file_chooser):
-        self.project.working_directory = file_chooser.get_filename()   
+        self.project.working_directory = file_chooser.get_filename()
+    
+    def on_lib_dir_chooser_file_set(self, file_chooser):
+        self.project.lib_dir = file_chooser.get_filename()
     
     ###################################
     """ Variable Editor Handlers"""
@@ -160,42 +206,56 @@ class Handler:
     ###################################
     
     def on_cmd_editor_clicked(self, command_editor):
+        self.tempcmd = deepcopy(self.module.command)
         update_textview(self.builder.get_object('command_editor_textview'),
-                                                self.module.command,
+                                                self.tempcmd,
                                                 self.tagtable,
                                                 get_spinner_index(self.builder.get_object('index_spin_button')))
         command_editor.show()
         
-    def on_save_module_button_clicked(self, data=None):
-        self.module.category = self.builder.get_object('module_category_search_entry').get_text()
-        self.module.name = self.builder.get_object('module_name_entry').get_text()
-        self.module.author = self.builder.get_object('module_author_entry').get_text()
-        self.module.desc = self.builder.get_object('module_description_entry').get_text()
-        self.module.url = self.builder.get_object('module_url_entry').get_text()
-        #### need to add this after self.module.command = None 
-        # validate
-        valid, error_message = validate_module(self.module)
-        if valid:
-            self.module.save(self.project.root)
-            info_dialog = self.builder.get_object('info_dialog')
-            info_dialog.set_markup("<b>Info</b>")
-            info_dialog.format_secondary_markup(self.module.name + ".mod saved successfully.")
-            info_dialog.show()
-            self.lib_liststore.append([self.module.category, 
-                                        self.module.name,
-                                        self.module.author,
-                                        self.module.desc,
-                                        self.module.fp])
-            self.builder.get_object('module_editor').hide()     
+    def on_new_module_ok_button_clicked(self, module_editor):
+        name = self.builder.get_object('module_name_entry').get_text()
+        state = "Ready"
+        uri = self.builder.get_object('module_url_entry').get_text()
+        buff = self.builder.get_object('mod_notes_buff')
+        notes = buff.get_text(buff.get_start_iter(), buff.get_end_iter(), False)
+       
+        #valid, error_message = validate_module(self.module)
+        if True:
+            # save state
+            self.module.name = name
+            self.module.uri = uri
+            self.module.notes = notes
+            if self.edit:
+                self.pro_liststore.set(self.current_pro_liststore_iter, [0,1,2],
+                                          [self.module.step,
+                                          self.module.name,
+                                          "Ready"])
+                # user feedback
+                info_dialog = self.builder.get_object('info_dialog')
+                info_dialog.set_markup("<b>Info</b>")
+                info_dialog.format_secondary_markup(self.module.name + ".mod updated successfully.")
+                info_dialog.show()
+                module_editor.hide()
+            else:
+                self.module.step = self.step
+                self.module.iter = self.pro_liststore.append([ self.module.step,
+                                            self.module.name,
+                                            "Ready"])
+                self.modules.append(self.module)
+                # user feedback
+                info_dialog = self.builder.get_object('info_dialog')
+                info_dialog.set_markup("<b>Info</b>")
+                info_dialog.format_secondary_markup(self.module.name + ".mod created successfully.")
+                info_dialog.show()
+                module_editor.hide()     
+                # increment step
+                self.step+=1
         else:
             warning_dialog = self.builder.get_object('warning_dialog')
             warning_dialog.set_markup("<b>Warning</b>")
             warning_dialog.format_secondary_markup(error_message)
             warning_dialog.show()
-            
-    def on_module_editor_focus_in_event(self, module_command_entry, widget):
-        if self.module.command is not None:
-            module_command_entry.set_text(self.module.command.str)
             
     ##############################
     """ Command Editor Handlers"""
@@ -203,30 +263,41 @@ class Handler:
     
     def on_index_spin_button_value_changed(self, index_spin_button):
         update_textview(self.builder.get_object('command_editor_textview'), 
-                                                self.module.command,
+                                                self.tempcmd,
                                                 self.tagtable,
-                                                get_spinner_index(self.builder.get_object('index_spin_button')))       
-
+                                                get_spinner_index(self.builder.get_object('index_spin_button')))
+    
+    # # # Loop handlers # # #
     
     def ce_on_add_loop_clicked(self, loop_editor):
         self.builder.get_object('le_var_entry').set_text("")
         self.builder.get_object('le_dir_selection_entry').set_text("")
         loop_editor.show()
     
-    def ce_on_view_loop_clicked(self, loop_viewer):
-        view_looper(self.builder, self.project, self.module.command.loops)
+    def ce_on_loop_directories_clicked(self, loop_viewer):
+        self.builder.get_object('lv_header').set_title("Loop Directories")
+        self.builder.get_object('lv_header').set_subtitle(self.module.name)
+        view_loop_directories(self.builder, self.project, self.tempcmd.loops)
         loop_viewer.show()
     
-    def ce_on_run_clicked(self, data=None):
-        return_code = run_module(self.builder, self.project, self.module)
-        #if return_code
+    def ce_on_loop_file_sel_clicked(self, file_selection_viewer):
+        buff = self.builder.get_object('file_selection_buffer')
+        buff.set_text(get_loop_file_selection(self.builder, 
+                                                self.project,
+                                                self.module), -1)
+        file_selection_viewer.show()
+    
+    def ce_on_run_test_clicked(self, file_selection_viewer):
+        run_test(self.builder, self.project, self.module)
+    
+    # # # # # # # # # # # # #
     
     def on_add_function_clicked(self, function_editor):
-        if self.module.command.func[2] is "":
+        if self.tempcmd.func[2] is "":
             function_editor.show()
         else:
             self.builder.get_object('function_editor_header').set_title('Edit Function')
-            self.builder.get_object('function_editor_entry').set_text(self.module.command.func[2])
+            self.builder.get_object('function_editor_entry').set_text(self.tempcmd.func[2])
             function_editor.show()
     
     def on_add_flag_option_clicked(self, flag_option_editor):
@@ -246,28 +317,26 @@ class Handler:
         self.edit_flag = False, None
         self.builder.get_object('se_header').set_title("Add Set Option")
         self.builder.get_object('se_flag_entry').set_text("")
-        self.builder.get_object('se_radio_file').set_active(True)
+        self.builder.get_object('se_relative').set_active(True)
         self.builder.get_object('se_file_selection_entry').set_text("")
-        self.builder.get_object('se_radio_none').set_active(True)
-        self.builder.get_object('se_match_none').set_active(True)
         set_option_editor.show()
         
     def on_ce_edit_button_clicked(self, data=None):
         index = get_spinner_index(self.builder.get_object('index_spin_button'))
-        if index == self.module.command.func[0]:
+        if index == self.tempcmd.func[0]:
             # Edit function
             self.builder.get_object('function_editor_header').set_title('Edit Function')
-            self.builder.get_object('function_editor_entry').set_text(self.module.command.func[2])
+            self.builder.get_object('function_editor_entry').set_text(self.tempcmd.func[2])
             self.builder.get_object('function_editor').show()
             return
-        for i,flag in enumerate(self.module.command.flags):
+        for i,flag in enumerate(self.tempcmd.flags):
             if index == flag[0]:
                 self.edit_flag = True, i
                 self.builder.get_object('foe_header').set_title("Edit Flag Option")
                 self.builder.get_object('foe_flag_entry').set_text(flag[2])
                 self.builder.get_object('flag_option_editor').show()
                 return
-        for i,static in enumerate(self.module.command.statics):
+        for i,static in enumerate(self.tempcmd.statics):
             if index == static[0]:
                 self.edit_flag = True, i
                 self.builder.get_object('soe_header').set_title("Edit Static Option")
@@ -275,47 +344,34 @@ class Handler:
                 self.builder.get_object('soe_static_arg_entry').set_text(static[3])
                 self.builder.get_object('static_option_editor').show()
                 return
-        for i,sett in enumerate(self.module.command.sets):
+        for i,sett in enumerate(self.tempcmd.sets):
             if index == sett[0]:
                 self.edit_flag = True, i
                 self.builder.get_object('se_header').set_title("Edit Set Option")
                 self.builder.get_object('se_flag_entry').set_text(sett[2])
-                if sett[3] == "file":
-                    self.builder.get_object('se_radio_file').set_active(True)
+                if sett[3]: # relative path
+                    self.builder.get_object('se_relative').set_active(True)
                 else:
-                    self.builder.get_object('se_radio_directory').set_active(True)   
+                    self.builder.get_object('se_absolute').set_active(True)   
                 self.builder.get_object('se_file_selection_entry').set_text(sett[4])
-                if sett[5] == "none":
-                    self.builder.get_object('se_radio_none').set_active(True)
-                elif sett[5] == "input":
-                    self.builder.get_object('se_radio_input').set_active(True)
-                else:
-                    self.builder.get_object('se_radio_output').set_active(True)
-                if sett[6] == 'none':
-                    self.builder.get_object('se_match_none').set_active(True)
-                elif sett[6] == 'source':
-                    self.builder.get_object('se_match_source').set_active(True)
-                else:
-                    self.builder.get_object('se_match_clone').set_active(True)
                 self.builder.get_object('set_option_editor').show()
                 return
     
     def on_ce_del_button_clicked(self, data=None):
-        #pdb.set_trace()
         index = get_spinner_index(self.builder.get_object('index_spin_button'))
-        if index == self.module.command.func[0]:
-            self.module.command.func = [None, None, ""]
-        for i,flag in enumerate(self.module.command.flags):
+        if index == self.self.tempcmd.func[0]:
+            self.self.tempcmd.func = [None, None, ""]
+        for i,flag in enumerate(self.tempcmd.flags):
             if index == flag[0]:
-                self.module.command.flags.remove(flag)
-        for i,static in enumerate(self.module.command.statics):
+                self.self.tempcmd.flags.remove(flag)
+        for i,static in enumerate(self.self.tempcmd.statics):
             if index == static[0]:
-                self.module.command.statics.remove(static)
-        for i,sett in enumerate(self.module.command.sets):
+                self.self.tempcmd.statics.remove(static)
+        for i,sett in enumerate(self.self.tempcmd.sets):
             if index == sett[0]:
-                self.module.command.sets.remove(sett)
+                self.self.tempcmd.sets.remove(sett)
         update_textview(self.builder.get_object('command_editor_textview'), 
-                                                self.module.command,
+                                                self.self.tempcmd,
                                                 self.tagtable,
                                                 get_spinner_index(self.builder.get_object('index_spin_button')))
             
@@ -326,6 +382,12 @@ class Handler:
         self.builder.get_object('index_spin_button').set_value(float(0))
         command_editor.hide()
         return True
+    
+    def on_ce_ok_button_clicked(self, command_editor):
+        module_command_entry = self.builder.get_object('module_command_entry')
+        module_command_entry.set_text(self.tempcmd.str)
+        self.module.command = self.tempcmd
+        command_editor.hide()
     
     
     ###################################
@@ -341,8 +403,8 @@ class Handler:
     def on_le_ok_button_clicked(self, loop_editor):
         var = self.builder.get_object('le_var_entry').get_text()
         dir_selection = self.builder.get_object('le_dir_selection_entry').get_text()
-        loop_no = len(self.module.command.loops)+1
-        self.module.command.loops.append([loop_no,
+        loop_no = len(self.self.tempcmd.loops)+1
+        self.self.tempcmd.loops.append([loop_no,
                                     "$"+var,
                                     get_local_var_value(dir_selection),
                                     dir_selection])
@@ -358,10 +420,10 @@ class Handler:
     
     def on_fe_ok_button_clicked(self, function_editor):
         # !! NOTE need to do validation here
-        self.module.command.func = [None, "func", self.builder.get_object('function_editor_entry').get_text()]
-        self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
+        self.tempcmd.func = [None, "func", self.builder.get_object('function_editor_entry').get_text()]
+        self.builder.get_object('adjustment').set_upper(self.tempcmd.get_max_index())
         update_textview(self.builder.get_object('command_editor_textview'),
-                                                self.module.command,
+                                                self.tempcmd,
                                                 self.tagtable,
                                                 get_spinner_index(self.builder.get_object('index_spin_button')))
         function_editor.hide()
@@ -375,11 +437,11 @@ class Handler:
         flag = self.builder.get_object('foe_flag_entry').get_text()
         edit, index = self.edit_flag
         if not edit:
-            self.module.command.flags.append([None, "flag", flag])
+            self.tempcmd.flags.append([None, "flag", flag])
         else:
-            self.module.command.flags[index][2] = flag
-        self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
-        update_textview(self.builder.get_object('command_editor_textview'), self.module.command, self.tagtable, get_spinner_index(self.builder.get_object('index_spin_button')))
+            self.tempcmd.flags[index][2] = flag
+        self.builder.get_object('adjustment').set_upper(self.tempcmd.get_max_index())
+        update_textview(self.builder.get_object('command_editor_textview'), self.tempcmd, self.tagtable, get_spinner_index(self.builder.get_object('index_spin_button')))
         flag_option_editor.hide()
         
     ####################################
@@ -392,17 +454,17 @@ class Handler:
         
         edit, index = self.edit_flag
         if not edit:
-            self.module.command.statics.append([None, 
-                                                "static", 
-                                                flag,
-                                                static_arg])
+            self.tempcmd.statics.append([None, 
+                                        "static", 
+                                        flag,
+                                        static_arg])
         else:
-            self.module.command.statics[index][2] = flag
-            self.module.command.statics[index][3] = static_arg
+            self.tempcmd.statics[index][2] = flag
+            self.tempcmd.statics[index][3] = static_arg
         
-        self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
+        self.builder.get_object('adjustment').set_upper(self.tempcmd.get_max_index())
         update_textview(self.builder.get_object('command_editor_textview'), 
-                                                self.module.command,
+                                                self.tempcmd,
                                                 self.tagtable,
                                                 get_spinner_index(self.builder.get_object('index_spin_button')))
         static_option_editor.hide()
@@ -413,67 +475,34 @@ class Handler:
     
     def on_se_ok_button_clicked(self, set_option_editor):
         flag = self.builder.get_object('se_flag_entry').get_text()
-        file_type_selection = self.builder.get_object('se_radio_file').get_active()
+        set_type = self.builder.get_object('se_relative').get_active()
         file_selection = self.builder.get_object('se_file_selection_entry').get_text()
-        none_tag_selection = self.builder.get_object('se_radio_none').get_active()
-        input_tag_selection = self.builder.get_object('se_radio_input').get_active()
-        none_match_selection = self.builder.get_object('se_match_none').get_active()
-        source_match_selection = self.builder.get_object('se_match_source').get_active()
+
         # !! NOTE need to do validation here 
-        if file_type_selection:
-            file_selection_type = "file"
+        if set_type:
+            relative = True
         else:
-            file_selection_type = "directory"
-        
-        if none_tag_selection:
-            file_selection_tag = 'none'
-        elif input_tag_selection:
-            file_selection_tag = 'input'
-        else:
-            file_selection_tag = 'output'
-        
-        if none_match_selection:
-            matching = 'none'
-        elif source_match_selection:
-            matching = 'source'
-        else:
-            matching = 'clone'
+            relative = False
         
         edit, index = self.edit_flag
         if not edit:
-            self.module.command.sets.append([None,
+            self.tempcmd.sets.append([None,
                                             "iter",
                                             flag,
-                                            file_selection_type,
-                                            file_selection,
-                                            file_selection_tag,
-                                            matching])
+                                            relative,
+                                            file_selection])
         else:
-            self.module.command.sets[index][2] = flag
-            self.module.command.sets[index][3] = file_selection_type
-            self.module.command.sets[index][4] = file_selection
-            self.module.command.sets[index][5] = file_selection_tag
-            self.module.command.sets[index][6] = matching
+            self.tempcmd.sets[index][2] = flag
+            self.tempcmd.sets[index][3] = relative
+            self.tempcmd.sets[index][4] = file_selection
             
         
-        self.builder.get_object('adjustment').set_upper(self.module.command.get_max_index())
+        self.builder.get_object('adjustment').set_upper(self.tempcmd.get_max_index())
         update_textview(self.builder.get_object('command_editor_textview'), 
-                                                self.module.command,
+                                                self.tempcmd,
                                                 self.tagtable,
                                                 get_spinner_index(self.builder.get_object('index_spin_button')))
         set_option_editor.hide()
-        
-    def on_ioe_view_selection_button_clicked(self, file_selection_viewer):
-        # get file selection & file type from entry
-        ftype = self.builder.get_object('se_radio_file').get_active()
-        if not ftype:
-            ftype = False      
-        fs = self.builder.get_object('se_file_selection_entry').get_text()
-        # CALL VALIDATION SUB HERE
-        # !!! NOTE for file type selections, last char must not be /
-        # !!! NOTE for directory type selections, last character must not be
-        # wildcard *
-        list_file_selection_contents(self.builder, self.project.vars, fs, ftype)
     
     ######################################
     """ File Selection Viewer Handlers"""
@@ -483,16 +512,39 @@ class Handler:
     
     ######################################
     
+    def reset_step_indices(self):
+        for i,module in enumerate(self.modules):
+            module.step = i+1
+            self.pro_liststore.set(module.iter, [0], [i+1])
+    
     def __init__(self, project, builder, liststores, tagtable):
         self.project = project
         self.builder = builder
         self.variables_liststore = liststores[0]
-        self.lib_liststore = liststores[1]
+        self.pro_liststore = liststores[1]
+        self.modules = []
         self.loop_liststore = liststores[2]
         self.lv_liststore = liststores[3]
         self.tagtable = tagtable
         self.module = None
         self.variable = None
-        self.stdout = ""      
+        self.stdout = ""
+        self.step = 1
+
+        """
+        # # # TEST CASE 1
+        self.project.vars.append(["${ROOT}", "ASD/TD"])
+        self.project.working_directory = "/home/cboyce/Documents/"
+        self.module = Module()
+        self.loop_liststore.append([1, "$subj", "%{(SUB..)}", "${ROOT}/<v>%{(SUB..)}</v>"])
+        self.loop_liststore.append([2, "$run", "%{(RUN..)}", "/*/<v>%{(RUN..)}</v>"])
+        self.module.command.loops.append([1, "$subj", "%{(SUB..)}", "${ROOT}/<v>%{(SUB..)}</v>"])
+        self.module.command.loops.append([2, "$run", "%{(RUN..)}", "/*/<v>%{(RUN..)}</v>"])
+        
+        self.module.command.func = [None, "func", "3dDespike"]
+        self.module.command.sets.append([None, "iter", "-prefix", True, "d.{$subj}.REST.{$run}+orig"])
+        self.module.command.sets.append([None, "iter", "", True, "{$subj}.REST.{$run}+orig"])
+        """
+              
     
 
