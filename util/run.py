@@ -2,7 +2,7 @@
 
 from gi.repository import GLib, Gtk, GObject
 
-from util.loop import *
+from util.loop_utils import *
 from lib.command import Command
 import re
 from copy import deepcopy
@@ -43,9 +43,8 @@ def execute_cmd(builder, cmds, textview, buff, prj_cwd):
         GLib.timeout_add(500, update_terminal, (cp, textview, buff))
         cp.wait() 
 
-def generate_cmds(builder, project, module):
+def generate_cmds(builder, project, command):
     """ Return array of shell commands to be executed """
-    command = module.command
     # concatenate all loop dir selections giving us relative path to execution
     # directory. This is the relative path we pass to the shell at project
     # working directory
@@ -68,11 +67,11 @@ def generate_cmds(builder, project, module):
             regex = local_var_regexes[key]
             m = re.search(regex, exec_dir)
             local_var_values[key] = m[0]
-        cmds.append(command.print(exec_dir, local_var_values))
+        cmds.append(command.print(project.vars, exec_dir, local_var_values))
     return cmds  
 
-def run_test(builder, project, module):
-    cmds = generate_cmds(builder, project, module)    
+def run_test(builder, project, module, command):
+    cmds = generate_cmds(builder, project, command)    
     terminal = builder.get_object('file_selection_viewer')
     textview = builder.get_object('file_selection_textview')
     builder.get_object('fsv_header').set_title('Run Test')
@@ -86,10 +85,10 @@ def run_test(builder, project, module):
     thread.daemon = True
     thread.start()
 
-def get_loop_file_selection(builder, project, module):
+def get_loop_file_selection(builder, project, module, command):
     builder.get_object('fsv_header').set_title('Loop File Selection')
     builder.get_object('fsv_header').set_subtitle(module.name)
-    cmds = generate_cmds(builder, project, module)
+    cmds = generate_cmds(builder, project, command)
     string = ""
     for cmd in cmds:
         string += cmd + "\n"

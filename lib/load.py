@@ -2,9 +2,9 @@
 
 import pickle
 
-def load_module(filename):
-        try:
-            fo = open(filename, 'rb')
-            return pickle.load(fo)
-        except pickle.UnpicklingError:
-            pass
+def open_project(filename):
+    try:
+        fo = open(filename, 'rb')
+        return pickle.load(fo)
+    except pickle.UnpicklingError:
+        pass

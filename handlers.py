@@ -8,14 +8,15 @@ from copy import deepcopy
 
 from lib.module import Module
 from lib.command import Command
+from lib.loop import Loop
 from lib.variable import Variable
 from util.treeview import *
 from util.validation import *
 from util.command_editor import *
 from util.file_selection import *
-from util.loop import *
+from util.loop_utils import *
 from util.run import *
-from lib.load import load_module
+from lib.load import open_project
 
 # activate debugger
 import pdb
@@ -27,6 +28,11 @@ class Handler:
     ###################################
     
     def exit(self, wrapper, data=None):
+        wrapper.destroy()
+        Gtk.main_quit()
+    
+    def quit_button(self, wrapper):
+        # save changes dialog
         wrapper.destroy()
         Gtk.main_quit()
     
@@ -50,7 +56,58 @@ class Handler:
     """ Main Window Handlers """
     ###################################
             
-    """ File Menu Handlers """
+    """ Project Menu Handlers """
+    
+    def on_open_project_clicked(self, open_dialog):
+        open_dialog.show()
+        
+    def on_od_open_clicked(self, open_dialog):
+        fn = open_dialog.get_filename()
+        if fn == self.project.filename:
+            info_dialog = self.builder.get_object('info_dialog')
+            info_dialog.set_markup("<b>Info</b>")
+            info_dialog.format_secondary_markup("Project already open.")
+            info_dialog.show()
+        else:
+            self.project = open_project(fn)
+            # set self.pro_liststore and self.loop_liststore
+            self.init_liststores()
+            for var in self.project.vars:
+                self.variables_liststore.append([var[0], var[1]])
+            self.builder.get_object('work_dir_chooser').set_filename(self.project.working_directory)
+            self.builder.get_object('pe_header').set_subtitle(self.project.name)
+            open_dialog.hide()
+    
+    def on_save_project_activated(self, save_dialog):
+        """ Pop up save as dialog is project has yet to be saved """
+        if self.project.filename is None:
+            save_dialog.show()
+        else:
+            self.project.save()
+    
+    def on_save_project_as_activated(self, save_dialog):
+        """ Pop up save as dialog """
+        save_dialog.show()
+    
+    def on_sd_save_clicked(self, save_dialog):
+        """ Save the project """
+        fn = save_dialog.get_filename()
+        if fn is None:
+            info_dialog = self.builder.get_object('info_dialog') 
+            info_dialog.format_secondary_markup("Please enter a project name.")
+            info_dialog.show()
+        elif fn[-4:] == '.pro':
+            self.project.filename = fn
+            self.project.name = fn.rsplit("/",1)[1]
+        else:
+            self.project.filename = fn + '.pro'
+            self.project.name = fn.rsplit("/",1)[1] + '.pro'
+        self.project.save()
+        self.builder.get_object('pe_header').set_subtitle(self.project.name)
+        save_dialog.hide()
+    
+    def on_run_all_clicked(self, data=None):
+        pass
     
     """ Tools Menu Handlers """
     
@@ -65,13 +122,11 @@ class Handler:
     def on_about_activated(self, about_dialog):
         about_dialog.show()
         
-    """ Pipeline Editor Toolbar Handlers """
-    
-    ########################################
-    """ Library Manager Handlers """
-    ########################################
-    
+    # # # Project Editor Toolbar # # #
+     
     def on_new_module_clicked(self, module_editor):
+        # Create new Module object
+        self.module = Module()
         self.edit = False
         self.builder.get_object('module_editor_header').set_title('New Module')
         # clear the entries
@@ -79,11 +134,10 @@ class Handler:
         self.builder.get_object('module_url_entry').set_text("")
         self.builder.get_object('module_command_entry').set_text("")
         self.builder.get_object('mod_notes_buff').set_text("",-1)
-        # Create new Module object
-        self.module = Module()
         module_editor.show()
     
-    def on_editor_module_clicked(self, module_editor):
+    def on_edit_module_clicked(self, module_editor):
+        self.set_self_module()
         self.edit = True
         self.builder.get_object('module_editor_header').set_title('Edit Module')
         self.builder.get_object('module_name_entry').set_text(self.module.name)
@@ -100,10 +154,10 @@ class Handler:
     def on_mess_dialog_response(self, message_dialog, response):
         if response == -8:
             # delete module
-            self.modules.remove(self.module)
-            self.pro_liststore.remove(self.current_pro_liststore_iter)
-            self.reset_step_indices()
-            self.step -= 1 
+            self.project.modules.remove(self.module)
+            self.pro_liststore.remove(self.pro_liststore_iter)
+            self.reset_module_indices()
+            self.set_self_module()
         message_dialog.hide()
     
     def on_open_module_ref_clicked(self, warning_dialog):
@@ -114,32 +168,44 @@ class Handler:
     
     def on_move_up_clicked(self, data=None):
         """ Move selected module up one position in queue """
-        iterr = self.current_pro_liststore_iter
+        iterr = self.pro_liststore_iter
         index = self.pro_liststore.get_value(iterr, 0)-1
-        if index >= 0 and index < len(self.modules):
-            self.pro_liststore.swap(self.modules[index-1].iter, iterr)
-        self.modules.remove(self.module)
-        self.modules.insert(index-1, self.module)
+        if index > 0:
+            self.pro_liststore.swap(self.pro_liststore.iter_previous(iterr), iterr)
+        self.project.modules.remove(self.module)
+        self.project.modules.insert(index-1, self.module)
         # reset step indices
-        self.reset_step_indices()
+        self.reset_module_indices()
+        self.set_self_module()
     
     def on_move_down_clicked(self, data=None):
         """ Move selected module down one position in queue """
-        iterr = self.current_pro_liststore_iter
+        iterr = self.pro_liststore_iter
         index = self.pro_liststore.get_value(iterr, 0)-1
-        if index >= 0 and index < len(self.modules):
-            self.pro_liststore.swap(self.modules[index+1].iter, iterr)
-        self.modules.remove(self.module)
-        self.modules.insert(index+1, self.module)
+        if index < len(self.project.modules)-1:
+            self.pro_liststore.swap(self.pro_liststore.iter_next(iterr), iterr)
+        self.project.modules.remove(self.module)
+        self.project.modules.insert(index+1, self.module)
         # reset step indices
-        self.reset_step_indices()       
+        self.reset_module_indices()
+        self.set_self_module()       
     
     def on_pro_manager_selection_changed(self, selection):
         model, iterr = selection.get_selected()
-        self.current_pro_liststore_iter = iterr
-        if iterr is not None:
-            index = model.get_value(iterr, 0)-1
-            self.module = self.modules[index]
+        self.pro_liststore_iter = iterr
+        
+    def set_self_module(self):
+        if self.pro_liststore_iter is not None:
+            index = self.pro_liststore.get_value(self.pro_liststore_iter, 0)-1          
+            self.module = self.project.modules[index]
+            # need to do this in case cancel gets pressed so we don't lose
+            # reference even if selection is unchanged
+            self.last_module = self.module
+    
+    def cancel_new_module(self, module_editor):
+        if self.last_module is not None:
+            self.module = self.last_module
+        module_editor.hide()
         
         
     ###################################
@@ -152,7 +218,6 @@ class Handler:
         self.builder.get_object('ve_header').set_title('New Variable')
         self.builder.get_object('ve_name_entry').set_text("")
         self.builder.get_object('ve_file_selection_entry').set_text("")
-        
         variable_editor.show()
         
     def on_edit_variable_clicked(self, variable_editor):
@@ -169,8 +234,6 @@ class Handler:
         self.variables_liststore.remove(self.treeiter)
     
     def on_vm_ok_button_clicked(self, variable_manager):
-        serialize_treemodel(self.builder.get_object('vm_treeview').get_model(),
-                            self.project)
         self.builder.get_object('variable_editor').hide()
         variable_manager.hide()
 
@@ -180,9 +243,6 @@ class Handler:
     
     def on_work_dir_chooser_file_set(self, file_chooser):
         self.project.working_directory = file_chooser.get_filename()
-    
-    def on_lib_dir_chooser_file_set(self, file_chooser):
-        self.project.lib_dir = file_chooser.get_filename()
     
     ###################################
     """ Variable Editor Handlers"""
@@ -198,7 +258,9 @@ class Handler:
             self.variables_liststore.append([self.variable.name, self.variable.val])
         else:
             self.variables_liststore.set_value(self.treeiter, 0 , self.variable.name)
-            self.variables_liststore.set_value(self.treeiter, 1, self.variable.val)                       
+            self.variables_liststore.set_value(self.treeiter, 1, self.variable.val)  
+        serialize_treemodel(self.builder.get_object('vm_treeview').get_model(),
+                            self.project)                     
         variable_editor.hide() 
     
     ###################################
@@ -219,18 +281,16 @@ class Handler:
         uri = self.builder.get_object('module_url_entry').get_text()
         buff = self.builder.get_object('mod_notes_buff')
         notes = buff.get_text(buff.get_start_iter(), buff.get_end_iter(), False)
-       
         #valid, error_message = validate_module(self.module)
         if True:
-            # save state
-            self.module.name = name
-            self.module.uri = uri
-            self.module.notes = notes
             if self.edit:
-                self.pro_liststore.set(self.current_pro_liststore_iter, [0,1,2],
+                self.module.name = name
+                self.module.uri = uri
+                self.module.notes = notes
+                self.pro_liststore.set(self.pro_liststore_iter, [0,1,2],
                                           [self.module.step,
                                           self.module.name,
-                                          "Ready"])
+                                          self.module.state])
                 # user feedback
                 info_dialog = self.builder.get_object('info_dialog')
                 info_dialog.set_markup("<b>Info</b>")
@@ -238,19 +298,22 @@ class Handler:
                 info_dialog.show()
                 module_editor.hide()
             else:
-                self.module.step = self.step
-                self.module.iter = self.pro_liststore.append([ self.module.step,
+                # save state
+                self.module.name = name
+                self.module.uri = uri
+                self.module.notes = notes
+                self.module.step = len(self.project.modules)+1
+                self.module.state = "Ready"
+                iterr = self.pro_liststore.append([ self.module.step,
                                             self.module.name,
-                                            "Ready"])
-                self.modules.append(self.module)
+                                            self.module.state])
+                self.project.modules.append(self.module)
                 # user feedback
                 info_dialog = self.builder.get_object('info_dialog')
                 info_dialog.set_markup("<b>Info</b>")
                 info_dialog.format_secondary_markup(self.module.name + ".mod created successfully.")
                 info_dialog.show()
-                module_editor.hide()     
-                # increment step
-                self.step+=1
+                module_editor.hide()
         else:
             warning_dialog = self.builder.get_object('warning_dialog')
             warning_dialog.set_markup("<b>Warning</b>")
@@ -270,9 +333,36 @@ class Handler:
     # # # Loop handlers # # #
     
     def ce_on_add_loop_clicked(self, loop_editor):
+        self.edit = False
         self.builder.get_object('le_var_entry').set_text("")
         self.builder.get_object('le_dir_selection_entry').set_text("")
         loop_editor.show()
+    
+    def ce_on_edit_loop_clicked(self, loop_editor):
+        if self.loop_liststore_iter is not None:
+            self.edit = True
+            # get rid of '$' at front of var, it will get added when saved
+            self.builder.get_object('le_var_entry').set_text(self.loop.var[1:])
+            self.builder.get_object('le_dir_selection_entry').set_text(self.loop.dir_selection)
+            loop_editor.show()
+        else:
+            info_dialog = self.builder.get_object('info_dialog')
+            info_dialog.set_markup("<b>Info</b>")
+            info_dialog.format_secondary_markup("You must add at least one loop before editing.")
+            info_dialog.show()
+            
+    def ce_on_delete_loop_clicked(self, data=None):
+        if self.loop_liststore_iter is not None:
+            self.loop_liststore.remove(self.loop_liststore_iter)
+            self.tempcmd.loops.remove(self.loop)
+            self.reset_loop_indices()
+            self.set_self_loop()
+        else:
+            info_dialog = self.builder.get_object('info_dialog')
+            info_dialog.set_markup("<b>Info</b>")
+            info_dialog.format_secondary_markup("You must add at least one loop before deleting.")
+            info_dialog.show()
+        
     
     def ce_on_loop_directories_clicked(self, loop_viewer):
         self.builder.get_object('lv_header').set_title("Loop Directories")
@@ -284,11 +374,21 @@ class Handler:
         buff = self.builder.get_object('file_selection_buffer')
         buff.set_text(get_loop_file_selection(self.builder, 
                                                 self.project,
-                                                self.module), -1)
+                                                self.module,
+                                                self.tempcmd), -1)
         file_selection_viewer.show()
     
     def ce_on_run_test_clicked(self, file_selection_viewer):
-        run_test(self.builder, self.project, self.module)
+        run_test(self.builder, self.project, self.module, self.tempcmd)
+    
+    def on_loop_selection_changed(self, selection):
+        model, iterr = selection.get_selected()
+        self.loop_liststore_iter = iterr
+    
+    def set_self_loop(self):
+        if self.loop_liststore_iter is not None:
+            index = self.loop_liststore.get_value(self.loop_liststore_iter, 0)-1
+            self.loop = self.tempcmd.loops[index]
     
     # # # # # # # # # # # # #
     
@@ -359,19 +459,19 @@ class Handler:
     
     def on_ce_del_button_clicked(self, data=None):
         index = get_spinner_index(self.builder.get_object('index_spin_button'))
-        if index == self.self.tempcmd.func[0]:
-            self.self.tempcmd.func = [None, None, ""]
+        if index == self.tempcmd.func[0]:
+            self.tempcmd.func = [None, None, ""]
         for i,flag in enumerate(self.tempcmd.flags):
             if index == flag[0]:
-                self.self.tempcmd.flags.remove(flag)
-        for i,static in enumerate(self.self.tempcmd.statics):
+                self.tempcmd.flags.remove(flag)
+        for i,static in enumerate(self.tempcmd.statics):
             if index == static[0]:
-                self.self.tempcmd.statics.remove(static)
-        for i,sett in enumerate(self.self.tempcmd.sets):
+                self.tempcmd.statics.remove(static)
+        for i,sett in enumerate(self.tempcmd.sets):
             if index == sett[0]:
-                self.self.tempcmd.sets.remove(sett)
+                self.tempcmd.sets.remove(sett)
         update_textview(self.builder.get_object('command_editor_textview'), 
-                                                self.self.tempcmd,
+                                                self.tempcmd,
                                                 self.tagtable,
                                                 get_spinner_index(self.builder.get_object('index_spin_button')))
             
@@ -393,25 +493,28 @@ class Handler:
     ###################################
     """ Loop Editor Handlers"""
     ###################################
-    
-    def on_view_loop_clicked(self, loop_viewer):
-        local_var = self.builder.get_object('le_var_entry').get_text()
-        dir_selection = self.builder.get_object('le_dir_selection_entry').get_text()
-        view_loop(self.builder, self.project, self.lv_liststore, local_var, dir_selection)
-        loop_viewer.show()
-    
+        
     def on_le_ok_button_clicked(self, loop_editor):
         var = self.builder.get_object('le_var_entry').get_text()
         dir_selection = self.builder.get_object('le_dir_selection_entry').get_text()
-        loop_no = len(self.self.tempcmd.loops)+1
-        self.self.tempcmd.loops.append([loop_no,
-                                    "$"+var,
+        if self.edit:
+            self.loop.var = "$"+var
+            self.loop.var_selection = get_local_var_value(dir_selection)
+            self.loop.dir_selection = dir_selection
+            self.loop_liststore.set(self.loop_liststore_iter,
+                                    [1,2,3],
+                                    ["$"+var,
                                     get_local_var_value(dir_selection),
                                     dir_selection])
-        self.loop_liststore.append([loop_no,
-                                    "$"+var,
-                                    get_local_var_value(dir_selection),
-                                    dir_selection])
+        else:
+            # add new loop
+            loop_no = len(self.tempcmd.loops)+1
+            self.loop = Loop(loop_no, "$"+var, get_local_var_value(dir_selection), dir_selection)
+            iterr = self.loop_liststore.append([loop_no,
+                                                "$"+var,
+                                                get_local_var_value(dir_selection),
+                                                dir_selection])
+            self.tempcmd.loops.append(self.loop)
         loop_editor.hide()
     
     ###################################
@@ -512,39 +615,48 @@ class Handler:
     
     ######################################
     
-    def reset_step_indices(self):
-        for i,module in enumerate(self.modules):
+    def init_liststores(self):
+        for module in self.project.modules:
+            iterr = self.pro_liststore.append([ module.step,
+                                                module.name,
+                                                module.state])
+            for loop in module.command.loops:
+                iterr = self.loop_liststore.append([loop.no,
+                                                    loop.var,
+                                                    loop.var_selection,
+                                                    loop.dir_selection])
+    
+    def reset_module_indices(self):
+        module_iters = []
+        curr = self.pro_liststore.get_iter_first()
+        while curr is not None:
+            module_iters.append(curr)
+            curr = self.pro_liststore.iter_next(curr)
+        for i,module in enumerate(self.project.modules):
             module.step = i+1
-            self.pro_liststore.set(module.iter, [0], [i+1])
+            self.pro_liststore.set(module_iters[i], [0], [i+1])
+    
+    def reset_loop_indices(self):
+        loop_iters = []
+        curr = self.loop_liststore.get_iter_first()
+        while curr is not None:
+            loop_iters.append(curr)
+            curr = self.loop_liststore.iter_next(curr)
+        for i,loop in enumerate(self.tempcmd.loops):
+            loop.no = i+1
+            self.loop_liststore.set(loop_iters[i], [0], [i+1])
     
     def __init__(self, project, builder, liststores, tagtable):
         self.project = project
         self.builder = builder
         self.variables_liststore = liststores[0]
         self.pro_liststore = liststores[1]
-        self.modules = []
         self.loop_liststore = liststores[2]
         self.lv_liststore = liststores[3]
         self.tagtable = tagtable
         self.module = None
         self.variable = None
-        self.stdout = ""
-        self.step = 1
-
-        """
-        # # # TEST CASE 1
-        self.project.vars.append(["${ROOT}", "ASD/TD"])
-        self.project.working_directory = "/home/cboyce/Documents/"
-        self.module = Module()
-        self.loop_liststore.append([1, "$subj", "%{(SUB..)}", "${ROOT}/<v>%{(SUB..)}</v>"])
-        self.loop_liststore.append([2, "$run", "%{(RUN..)}", "/*/<v>%{(RUN..)}</v>"])
-        self.module.command.loops.append([1, "$subj", "%{(SUB..)}", "${ROOT}/<v>%{(SUB..)}</v>"])
-        self.module.command.loops.append([2, "$run", "%{(RUN..)}", "/*/<v>%{(RUN..)}</v>"])
-        
-        self.module.command.func = [None, "func", "3dDespike"]
-        self.module.command.sets.append([None, "iter", "-prefix", True, "d.{$subj}.REST.{$run}+orig"])
-        self.module.command.sets.append([None, "iter", "", True, "{$subj}.REST.{$run}+orig"])
-        """
-              
-    
+        self.pro_liststore_iter = None
+        self.loop_liststore_iter = None
+        self.last_module = None
 

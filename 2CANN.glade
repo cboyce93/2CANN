@@ -201,13 +201,13 @@ Author: Cameron Boyce
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkHeaderBar">
+          <object class="GtkHeaderBar" id="pe_header">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="margin_top">12</property>
             <property name="margin_bottom">6</property>
             <property name="title" translatable="yes">Project Editor</property>
-            <property name="subtitle" translatable="yes">Untitled.pro*</property>
+            <property name="subtitle" translatable="yes">Untitled.pro</property>
             <property name="spacing">0</property>
             <child>
               <object class="GtkMenuBar">
@@ -239,6 +239,7 @@ Author: Cameron Boyce
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="activate" handler="on_open_project_clicked" object="open_dialog" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -248,6 +249,7 @@ Author: Cameron Boyce
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="activate" handler="on_save_project_activated" object="save_dialog" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -257,6 +259,7 @@ Author: Cameron Boyce
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="activate" handler="on_save_project_as_activated" object="save_dialog" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -311,6 +314,7 @@ Author: Cameron Boyce
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="activate" handler="quit_button" object="wrapper" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -406,6 +410,7 @@ Author: Cameron Boyce
                 <property name="tooltip_markup" translatable="yes">&lt;b&gt;Run All&lt;/b&gt;</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-media-play</property>
+                <signal name="clicked" handler="on_run_all_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -443,7 +448,7 @@ Author: Cameron Boyce
                 <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit Module&lt;/b&gt;</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-edit</property>
-                <signal name="clicked" handler="on_editor_module_clicked" object="module_editor" swapped="no"/>
+                <signal name="clicked" handler="on_edit_module_clicked" object="module_editor" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -683,34 +688,6 @@ Naail Khan</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">&lt;b&gt;Library Database:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFileChooserButton">
-                <property name="width_request">250</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="action">select-folder</property>
-                <property name="create_folders">False</property>
-                <property name="filter">db_filter</property>
-                <property name="title" translatable="yes">Modules Directory</property>
-                <signal name="file-set" handler="on_lib_dir_chooser_file_set" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">&lt;b&gt;Working Directory:&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
               </object>
@@ -771,6 +748,75 @@ Naail Khan</property>
             <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkFileChooserDialog" id="save_dialog">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Save Project As...</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="icon">img/icon.png</property>
+    <property name="type_hint">dialog</property>
+    <property name="transient_for">wrapper</property>
+    <property name="action">save</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="width_request">600</property>
+        <property name="height_request">500</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-cancel</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="close_button" object="save_dialog" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-save</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_sd_save_clicked" object="save_dialog" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>
@@ -1318,7 +1364,7 @@ Naail Khan</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="close_button" object="module_editor" swapped="no"/>
+                <signal name="clicked" handler="cancel_new_module" object="module_editor" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1409,6 +1455,7 @@ Naail Khan</property>
                 <property name="tooltip_markup" translatable="yes">&lt;b&gt;Edit Loop&lt;/b&gt;</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-edit</property>
+                <signal name="clicked" handler="ce_on_edit_loop_clicked" object="loop_editor" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1419,9 +1466,10 @@ Naail Khan</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete Loop&lt;/b&gt;</property>
+                <property name="tooltip_markup" translatable="yes">&lt;b&gt;Delete Last Loop&lt;/b&gt;</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-delete</property>
+                <signal name="clicked" handler="ce_on_delete_loop_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1510,7 +1558,9 @@ Naail Khan</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <child internal-child="selection">
-                  <object class="GtkTreeSelection"/>
+                  <object class="GtkTreeSelection" id="loop_selection">
+                    <signal name="changed" handler="on_loop_selection_changed" swapped="no"/>
+                  </object>
                 </child>
               </object>
             </child>
@@ -2694,6 +2744,80 @@ Naail Khan</property>
             <property name="fill">False</property>
             <property name="position">0</property>
           </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkFileFilter" id="open_filer">
+    <patterns>
+      <pattern>*.pro</pattern>
+    </patterns>
+  </object>
+  <object class="GtkFileChooserDialog" id="open_dialog">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Open Project</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="icon">img/icon.png</property>
+    <property name="type_hint">dialog</property>
+    <property name="transient_for">wrapper</property>
+    <property name="filter">open_filer</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="width_request">600</property>
+        <property name="height_request">500</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-cancel</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="close_button" object="open_dialog" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label">gtk-open</property>
+                <property name="width_request">100</property>
+                <property name="height_request">30</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_od_open_clicked" object="open_dialog" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>

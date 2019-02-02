@@ -27,7 +27,6 @@ class twoCANN:
         for i, col_title in enumerate(["Step", "Module Name", "State"]):
             renderer = Gtk.CellRendererText()
             column = Gtk.TreeViewColumn(col_title, renderer, text=i)
-            column.set_sort_column_id(i)
             treeview.append_column(column)
             if i == 1:
                 column.set_min_width(200)   # min width for module name
@@ -58,7 +57,7 @@ class twoCANN:
     
     def __init__(self):
         # Create new project object
-        project = Project('Untitled.pro')
+        project = Project()
         # import Glade generated GUI
         builder = Gtk.Builder.new_from_file('2CANN.glade')
         # Setup treeviews and liststores
