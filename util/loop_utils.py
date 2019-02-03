@@ -23,7 +23,7 @@ def concat_dir_selections(loops):
     """
     concated_dir_selection = ""
     for loop in loops:
-        concated_dir_selection += loop[3]
+        concated_dir_selection += loop.dir_selection
     return concated_dir_selection
 
 def get_execution_filepath(full_path, project_vars, loops):
@@ -50,7 +50,7 @@ def get_execution_filepath(full_path, project_vars, loops):
         # populate with wildcard so we can regex match later
         full_path = full_path.replace(m ,"*")
         # remove identifier tags
-        local_var_regexes[loops[i][1]] = m[5:-5]
+        local_var_regexes[loops[i].var] = m[5:-5]
 
     # find all remaining regexes not flagged
     reg_matches = re.findall(r'(%{.*?})', full_path)
@@ -104,13 +104,12 @@ def view_loop_directories(builder, project, loops):
     # clear out columns from last build
     for col in treeview.get_columns():
         treeview.remove_column(col)
-    
     column_titles = []
     dir_exp = ""
     # create columns for $var value
     for loop in loops:
-        column_titles.append(loop[1])
-        dir_exp += loop[3]
+        column_titles.append(loop.var)
+        dir_exp += loop.dir_selection
     column_titles.append("Directory Selection")
     
     # create liststore wiht extra spaces to allow for more loops

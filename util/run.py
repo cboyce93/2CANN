@@ -8,6 +8,7 @@ import re
 from copy import deepcopy
 import threading
 import time
+import os
 
 import pdb
 
@@ -38,7 +39,7 @@ def update_terminal(args):
 def execute_cmd(builder, cmds, textview, buff, prj_cwd):
     for i, cmd in enumerate(cmds):
         print("COMMAND "+str(i)+": " + cmd)
-        cp = SP.Popen([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True, cwd=prj_cwd)        
+        cp = SP.Popen([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True, cwd=prj_cwd, preexec_fn=os.setsid)        
         # poll till process terminates
         GLib.timeout_add(500, update_terminal, (cp, textview, buff))
         cp.wait() 
@@ -75,7 +76,7 @@ def run_test(builder, project, module, command):
     terminal = builder.get_object('file_selection_viewer')
     textview = builder.get_object('file_selection_textview')
     builder.get_object('fsv_header').set_title('Run Test')
-    builder.get_object('fsv_header').set_subtitle(module.name + '.mod')
+    builder.get_object('fsv_header').set_subtitle(module.name)
     terminal.show()
     buff = builder.get_object('file_selection_buffer')
     # clear buffer
@@ -93,6 +94,8 @@ def get_loop_file_selection(builder, project, module, command):
     for cmd in cmds:
         string += cmd + "\n"
     return string
+
+
 
    
                 

@@ -29,7 +29,7 @@ class twoCANN:
             column = Gtk.TreeViewColumn(col_title, renderer, text=i)
             treeview.append_column(column)
             if i == 1:
-                column.set_min_width(200)   # min width for module name
+                column.set_min_width(100)   # min width for module name
         # FOR TEST
         return pro_liststore  
     
@@ -39,7 +39,6 @@ class twoCANN:
         for i, col_title in enumerate(["No.", "Var", "Value", "Directory Selection"]):
             renderer = Gtk.CellRendererText()
             column = Gtk.TreeViewColumn(col_title, renderer, text=i)
-            column.set_sort_column_id(i)
             treeview.append_column(column)
         # FOR TEST
         return loop_liststore

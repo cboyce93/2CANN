@@ -15,10 +15,6 @@ class Project:
     def save(self):
         # create file object
         # remove GTK Iter references since pickle can't deal with them
-        for module in self.modules:
-            module.iter = None
-            for loop in module.command.loops:
-                loop.iter = None
         try:
             fo = open(self.filename , 'wb')
             pickle.dump(self, fo, protocol=pickle.DEFAULT_PROTOCOL)
@@ -33,7 +29,10 @@ class Project:
             self.unsaved_changes =  True
         else:
             self.unsaved_changes = False
-        
+     
+    def print(self):
+        for module in self.modules:
+            print(module.step, module.name)   
     
     def __init__(self):
         self.name = 'Untitled'
