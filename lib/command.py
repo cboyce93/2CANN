@@ -59,3 +59,4 @@ class Command:
         for var in project_vars:
             mystring = mystring.replace(var[0], var[1])
         return mystring
+

@@ -8,6 +8,7 @@ import os
 import signal
 from copy import deepcopy
 import threading
+import time
 
 from lib.project import Project, open_project
 from lib.module import Module
@@ -56,10 +57,12 @@ class Handler:
         return True
         
     ###################################
-    """ Main Window Handlers """
+    """ Project Editor Handlers """
     ###################################
-            
-    """ Project Menu Handlers """
+    
+    ###---------------------------###      
+    ### Project Filemenu Handlers ###
+    ###---------------------------###
     
     def on_new_project_activated(self, unsaved_changes_dialog):
         # check if project has unsaved changes.
@@ -78,23 +81,24 @@ class Handler:
         print(response)
     
     def on_open_project_clicked(self, open_dialog):
+        """ Show open dialog so user can select project file """
         open_dialog.show()
         
     def on_od_open_clicked(self, open_dialog):
+        """ unpickle file and return project object """
+        # get the filename
         fn = open_dialog.get_filename()
         if fn == self.project.filename:
+            # throw info dialog if user tries to open ocurrent project
             info_dialog = self.builder.get_object('info_dialog')
             info_dialog.set_markup("<b>Info</b>")
             info_dialog.format_secondary_markup("Project already open.")
             info_dialog.show()
         else:
             self.project = open_project(fn)
-            # set self.pro_liststore and self.loop_liststore
+            # populate GUI liststores
+            self.__init_project()
             self.init_liststores()
-            for var in self.project.vars:
-                self.variables_liststore.append([var[0], var[1]])
-            self.builder.get_object('work_dir_chooser').set_filename(self.project.working_directory)
-            self.builder.get_object('pe_header').set_subtitle(self.project.name)
             open_dialog.hide()
     
     def on_save_project_activated(self, save_dialog):
@@ -125,25 +129,76 @@ class Handler:
         self.builder.get_object('pe_header').set_subtitle(self.project.name)
         save_dialog.hide()
     
+    def on_directory_setup_activated(self, data=None):
+        """ Launch the directory setup tool """
+        pass
+    
+    def on_import_project_activated(self, data=None):
+        """ Import project
+        
+        Clear all module states, set working directory to user's home directory
+        """
+        pass
+    
+    def on_export_project_activated(self, data=None):
+        """ Export project
+        
+        Clear module states, set working directory to user's home directory
+        then save the project """
+        pass
+    
+    def on_quit_program_activated(self, data=None):
+        """ Exit program, ask if unsaved changes should be saved """
+        pass
+    
+    ###------------------###
+    ### Toolbar Handlers ###
+    ###------------------###
+    
     def on_run_all_clicked(self, data=None):
+        """ Run all modules from selected module """
         terminal = self.builder.get_object('file_selection_viewer')
         textview = self.builder.get_object('file_selection_textview')
         self.builder.get_object('fsv_header').set_title('Run All')
         buff = self.builder.get_object('file_selection_buffer')
-        # clear buffer
+        # clear buffer so we start with empty terminal
         buff.set_text("",-1)
+        # just shorten up
         prj_cwd = self.project.working_directory
         terminal.show()
+        # create an empty dictionary
+        # key - Module obj
+        # val - array of commands associated with module
         to_run = {}
         for module in self.project.modules:
             cmds = generate_cmds(self.builder, self.project, module.command)
             to_run[module] = cmds
+        # flag to tell us if a subprocess is active
         self.process_live = True
-        thread = threading.Thread(target=self.execute_cmd, args=(to_run, textview, buff, prj_cwd))
+        # open up non-blocking thread
+        thread = threading.Thread(target=self.execute_cmd, 
+                                    args=(to_run, textview, buff, prj_cwd))
         thread.daemon = True
+        # fire up the thread
         thread.start()
+        # make a new log for this run
+        self.log_run_liststore.append([self.get_date()])
+    
+    def get_date(self):
+        """ Return the date formatted as "YYYY/MM/DD@HH:MM:SS" """
+        thetime = time.localtime()
+        # format year/month/day@hour:min:sec
+        year    = str(thetime.tm_year)
+        month   = str(thetime.tm_mon)
+        day     = str(thetime.tm_mday)
+        hour    = str(thetime.tm_hour)
+        mn      = str(thetime.tm_min)
+        sec     = str(thetime.tm_sec)
+        return str(year+"/"+month.zfill(2)+"/"+day.zfill(2)+"@"+hour.zfill(2)+
+                    ":"+mn.zfill(2)+":"+sec.zfill(2))
     
     def on_view_terminal_clicked(self, file_selection_viewer):
+        """ View terminal output """
         if self.process_live:
             file_selection_viewer.show()
         else:
@@ -152,6 +207,7 @@ class Handler:
             warning_dialog.format_secondary_markup("No active processes.")
             warning_dialog.show()
             
+    """ These subroutines are associated with run all """
     
     def execute_cmd(self, to_run, textview, buff, prj_cwd):
         for module, cmds in to_run.items():
@@ -186,22 +242,8 @@ class Handler:
             self.process_live = False
             self.builder.get_object('fsv_header').set_subtitle('Process killed.')
         cancel_process_dialog.hide()
-        
     
-    """ Tools Menu Handlers """
-    
-    def on_variable_manager_activated(self, variable_manager):
-        variable_manager.show()
-    
-    def on_preferences_manager_activated(self, preferences_manager):
-        preferences_manager.show()
-    
-    """ Help Menu Handlers """
-    
-    def on_about_activated(self, about_dialog):
-        about_dialog.show()
-        
-    # # # Project Editor Toolbar # # #
+    """ Back to toolbar handlers now... """
      
     def on_new_module_clicked(self, module_editor):
         # Create new Module object
@@ -288,7 +330,26 @@ class Handler:
             self.module = self.last_module
         module_editor.hide()
         
-        
+    ###---------------------###
+    ### Tools Menu Handlers ###
+    ###---------------------###
+    
+    def on_variable_manager_activated(self, variable_manager):
+        variable_manager.show()
+    
+    def on_view_logs_activated(self, log_viewer):
+        log_viewer.show()
+    
+    def on_preferences_manager_activated(self, preferences_manager):
+        preferences_manager.show()
+    
+    ###--------------------###
+    ### Help Menu Handlers ###
+    ###--------------------###
+    
+    def on_about_activated(self, about_dialog):
+        about_dialog.show()
+
     ###################################
     """ Variable Manager Handlers"""
     ###################################
@@ -318,6 +379,20 @@ class Handler:
         self.builder.get_object('variable_editor').hide()
         variable_manager.hide()
 
+    ###################################
+    """ Log Viewer Handlers """
+    ###################################
+    
+    def on_log_viewer_selection_changed(self, selection):
+        self.log_filter.refilter()
+    
+    def on_log_run_selection_changed(self, selection):
+        model, iterr = selection.get_selected()
+        self.log_run_iter = iterr
+    
+    def log_viewer_filter_func(self, model, iterr, data):
+        print(self.log_run_iter[0])
+    
     ###################################
     """ Preferences Handlers"""
     ###################################
@@ -729,8 +804,12 @@ class Handler:
     ######################################
     
     def init_liststores(self):
+        """ populate liststores with values from project object """
+        self.variables_liststore.clear()
         self.pro_liststore.clear()
         self.loop_liststore.clear()
+        for var in self.project.vars:
+                self.variables_liststore.append([var[0], var[1]])
         for module in self.project.modules:
             iterr = self.pro_liststore.append([ module.step,
                                                 module.name,
@@ -798,6 +877,7 @@ class Handler:
         self.loop_liststore_iter = None
         self.last_module = None
         self.builder.get_object('work_dir_chooser').set_filename(self.project.working_directory)
+        self.builder.get_object('pe_header').set_subtitle(self.project.name)
         self.process_live = False
         self.pro_liststore.clear()
         self.loop_liststore.clear()
@@ -810,6 +890,12 @@ class Handler:
         self.pro_liststore = liststores[1]
         self.loop_liststore = liststores[2]
         self.lv_liststore = liststores[3]
+        self.log_run_liststore = liststores[4]
+        self.log_mod_liststore = liststores[5]
+        #Creating the filter, feeding it with the liststore model
+        self.log_filter = self.log_mod_liststore.filter_new()
+        #setting the filter function
+        self.log_filter.set_visible_func(self.log_viewer_filter_func)
         self.tagtable = tagtable
         self.__init_project()
         # timeout to check if project obj state has changed

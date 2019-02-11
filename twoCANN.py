@@ -54,6 +54,24 @@ class twoCANN:
         # FOR TEST
         return lv_liststore
     
+    def __init_log_run_treeview(self, treeview):
+        log_run_liststore = Gtk.ListStore(str)
+        treeview.set_model(log_run_liststore)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Run Time", renderer, text=0)
+        column.set_sort_column_id(0)
+        treeview.append_column(column)
+        return log_run_liststore
+        
+    def __init_log_mod_treeview(self, treeview):
+        log_mod_liststore = Gtk.ListStore(str)
+        treeview.set_model(log_mod_liststore)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Module", renderer, text=0)
+        column.set_sort_column_id(0)
+        treeview.append_column(column)
+        return log_mod_liststore
+
     def __init__(self):
         # Create new project object
         project = Project()
@@ -64,7 +82,10 @@ class twoCANN:
         pro_liststore = self.__init_pro_manager_treeview(builder.get_object('pro_treeview'))
         loop_liststore = self.__init_loop_manager_treeview(builder.get_object('loop_treeview'))
         loop_viewer_liststore = self.__init_loop_viewer_treeview(builder.get_object('loop_viewer_treeview'))
-        liststores = (variables_liststore, pro_liststore, loop_liststore, loop_viewer_liststore)
+        log_run_liststore = self.__init_log_run_treeview(builder.get_object('log_run_treeview'))
+        log_mod_liststore = self.__init_log_mod_treeview(builder.get_object('log_mod_treeview'))
+        liststores = (variables_liststore, pro_liststore, loop_liststore, 
+                        loop_viewer_liststore, log_run_liststore, log_mod_liststore)
         # build tag table for command editor Gtk.TextView for different
         # text styles
         tagtable = init_tagtable()
