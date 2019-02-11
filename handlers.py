@@ -9,6 +9,7 @@ import signal
 from copy import deepcopy
 import threading
 
+from lib.project import Project, open_project
 from lib.module import Module
 from lib.command import Command
 from lib.loop import Loop
@@ -19,7 +20,6 @@ from util.command_editor import *
 from util.file_selection import *
 from util.loop_utils import *
 from util.run import *
-from lib.load import open_project
 
 # activate debugger
 import pdb
@@ -60,6 +60,22 @@ class Handler:
     ###################################
             
     """ Project Menu Handlers """
+    
+    def on_new_project_activated(self, unsaved_changes_dialog):
+        # check if project has unsaved changes.
+        self.project.monitor()
+        if self.project.unsaved_changes:
+            # show message dialog
+            unsaved_changes_dialog.show()
+        else:
+            # create new project object
+            self.project = Project()
+            # initialize the GUI
+            self.__init_project()
+            
+    def on_unsaved_changes_dialog_response(self, unsaved_changes_dialog, response):
+        """ Read user response, save project if yes, close if no """
+        print(response)
     
     def on_open_project_clicked(self, open_dialog):
         open_dialog.show()
@@ -133,7 +149,7 @@ class Handler:
         else:
             warning_dialog = self.builder.get_object('warning_dialog')
             warning_dialog.set_markup("<b>Warning</b>")
-            warning_dialog.format_secondary_markup("No processes active.")
+            warning_dialog.format_secondary_markup("No active processes.")
             warning_dialog.show()
             
     
@@ -164,7 +180,7 @@ class Handler:
         cancel_process_dialog.format_secondary_markup("Are you sure you want to cancel the process?")
         cancel_process_dialog.show()
     
-    def on_cancel_process_dialog_response(self,  cancel_process_dialog, response):
+    def on_cancel_process_dialog_response(self, cancel_process_dialog, response):
         if response == -8:
             os.killpg(os.getpgid(self.pid), signal.SIGTERM)  # Send the signal to all the process groups
             self.process_live = False
@@ -336,6 +352,7 @@ class Handler:
         self.tempcmd = deepcopy(self.module.command)
         self.reset_loop_liststore()
         self.builder.get_object('index_spin_button').set_value(float(0))
+        self.builder.get_object('adjustment').set_upper(self.tempcmd.get_max_index())
         update_textview(self.builder.get_object('command_editor_textview'),
                                                 self.tempcmd,
                                                 self.tagtable,
@@ -406,7 +423,7 @@ class Handler:
         loop_editor.show()
     
     def ce_on_edit_loop_clicked(self, loop_editor):
-        self.set_self_loop(self)
+        self.set_self_loop()
         if self.loop_liststore_iter is not None:
             self.edit_loop = True
             # get rid of '$' at front of var, it will get added when saved
@@ -420,7 +437,7 @@ class Handler:
             info_dialog.show()
             
     def ce_on_delete_loop_clicked(self, data=None):
-        self.set_self_loop(self)
+        self.set_self_loop()
         if self.loop_liststore_iter is not None:
             self.loop_liststore.remove(self.loop_liststore_iter)
             self.tempcmd.loops.remove(self.loop)
@@ -448,7 +465,34 @@ class Handler:
         file_selection_viewer.show()
     
     def ce_on_run_test_clicked(self, file_selection_viewer):
-        run_test(self.builder, self.project, self.module, self.tempcmd)
+        cmds = generate_cmds(self.builder, self.project, self.tempcmd)    
+        terminal = file_selection_viewer
+        textview = self.builder.get_object('file_selection_textview')
+        self.builder.get_object('fsv_header').set_title('Run Test')
+        self.builder.get_object('fsv_header').set_subtitle(self.module.name)
+        terminal.show()
+        buff = self.builder.get_object('file_selection_buffer')
+        # clear buffer
+        buff.set_text("",-1)
+        prj_cwd = self.project.working_directory
+        self.process_live = True
+        thread = threading.Thread(target=self.execute_test_cmd, args=(self.builder, cmds, textview, buff, prj_cwd))
+        thread.daemon = True
+        thread.start()
+    
+    def execute_test_cmd(self, builder, cmds, textview, buff, prj_cwd):
+        self.builder.get_object('fsv_header').set_title('Running ' + self.module.name)
+        for i, cmd in enumerate(cmds):
+            if self.process_live:
+                self.builder.get_object('fsv_header').set_subtitle("("+str(i+1)+" of "+str(len(cmds))+") "+ cmd)
+                cp = SP.Popen([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True, cwd=prj_cwd, preexec_fn=os.setsid)   
+                self.pid = cp.pid     
+                # poll till process terminates
+                GLib.timeout_add(500, update_terminal, (cp, textview, buff))
+                cp.wait()
+            else:
+                break
+                
     
     def on_loop_selection_changed(self, selection):
         model, iterr = selection.get_selected()
@@ -734,6 +778,31 @@ class Handler:
             loop.no = i+1
             self.loop_liststore.set(loop_iters[i], [0], [i+1])
     
+    def __unsaved_changes(self, data=None):
+        """ Place asterisk to the right of project name in project editor
+            subtitle if there are unsaved changes """
+        # check for unsaved changes
+        self.project.monitor()
+        if self.project.unsaved_changes:
+            self.builder.get_object('pe_header').set_subtitle(self.project.name+"*")
+        else:
+            self.builder.get_object('pe_header').set_subtitle(self.project.name)
+        return True
+            
+    
+    def __init_project(self):
+        """ Initialize some parameters for a new project """
+        self.module = None
+        self.variable = None
+        self.pro_liststore_iter = None
+        self.loop_liststore_iter = None
+        self.last_module = None
+        self.builder.get_object('work_dir_chooser').set_filename(self.project.working_directory)
+        self.process_live = False
+        self.pro_liststore.clear()
+        self.loop_liststore.clear()
+        self.lv_liststore.clear()
+    
     def __init__(self, project, builder, liststores, tagtable):
         self.project = project
         self.builder = builder
@@ -742,11 +811,11 @@ class Handler:
         self.loop_liststore = liststores[2]
         self.lv_liststore = liststores[3]
         self.tagtable = tagtable
-        self.module = None
-        self.variable = None
-        self.pro_liststore_iter = None
-        self.loop_liststore_iter = None
-        self.last_module = None
-        self.builder.get_object('work_dir_chooser').set_filename(self.project.working_directory)
-        self.process_live = False
+        self.__init_project()
+        # timeout to check if project obj state has changed
+        GLib.timeout_add(500, self.__unsaved_changes, ())
+        
+        
+        
+        
 
