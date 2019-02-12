@@ -37,6 +37,7 @@ class Project:
         self.filename = None
         self.vars = []
         self.modules = []
+        self.logs = []
         self.working_directory = expanduser("~")
         self.last_state = self
         self.unsaved_changes = False

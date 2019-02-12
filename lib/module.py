@@ -11,5 +11,7 @@ class Module:
         self.command = Command()
         self.notes = None
         self.state = None
+        self.log = None
+        self.run_time = None
 
         

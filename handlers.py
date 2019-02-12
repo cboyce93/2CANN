@@ -5,6 +5,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 
 import os
+from os.path import expanduser
 import signal
 from copy import deepcopy
 import threading
@@ -82,6 +83,7 @@ class Handler:
     
     def on_open_project_clicked(self, open_dialog):
         """ Show open dialog so user can select project file """
+        self.immport = False
         open_dialog.show()
         
     def on_od_open_clicked(self, open_dialog):
@@ -96,26 +98,36 @@ class Handler:
             info_dialog.show()
         else:
             self.project = open_project(fn)
-            # populate GUI liststores
+            if self.immport:
+                for module in self.project.modules:
+                    module.state = "Ready"
+                self.project.working_directory = expanduser("~")
+                self.project.logs = []
             self.__init_project()
             self.init_liststores()
             open_dialog.hide()
     
     def on_save_project_activated(self, save_dialog):
         """ Pop up save as dialog is project has yet to be saved """
+        self.export = False
         if self.project.filename is None:
+            save_dialog.set_title("Save Project As...")
+            save_dialog.set_current_name(self.project.name)
             save_dialog.show()
         else:
             self.project.save()
     
     def on_save_project_as_activated(self, save_dialog):
         """ Pop up save as dialog """
+        self.export = False
+        save_dialog.set_title("Save Project As...")
+        save_dialog.set_current_name(self.project.name)
         save_dialog.show()
     
     def on_sd_save_clicked(self, save_dialog):
         """ Save the project """
         fn = save_dialog.get_filename()
-        if fn is None:
+        if fn is None or fn.isspace():
             info_dialog = self.builder.get_object('info_dialog') 
             info_dialog.format_secondary_markup("Please enter a project name.")
             info_dialog.show()
@@ -125,27 +137,45 @@ class Handler:
         else:
             self.project.filename = fn + '.pro'
             self.project.name = fn.rsplit("/",1)[1] + '.pro'
-        self.project.save()
-        self.builder.get_object('pe_header').set_subtitle(self.project.name)
+        if self.export:
+            project = self.project
+            project.logs = []
+            for module in project.modules:
+                module.state = "Ready"
+            project.working_directory = expanduser("~")
+            project.save()
+        else:
+            self.project.save()
+            self.builder.get_object('pe_header').set_subtitle(self.project.name)
         save_dialog.hide()
     
     def on_directory_setup_activated(self, data=None):
         """ Launch the directory setup tool """
         pass
     
-    def on_import_project_activated(self, data=None):
+    def on_import_project_activated(self, open_dialog):
         """ Import project
         
         Clear all module states, set working directory to user's home directory
         """
-        pass
+        self.immport = True
+        open_dialog.show()
     
-    def on_export_project_activated(self, data=None):
+    def on_export_project_activated(self, save_dialog):
         """ Export project
         
         Clear module states, set working directory to user's home directory
         then save the project """
-        pass
+        save_dialog.set_title("Export Project...")
+        if self.project.filename is None:
+            warning_dialog = self.builder.get_object('warning_dialog')
+            warning_dialog.set_markup("<b>Warning</b>")
+            warning_dialog.format_secondary_markup("Save project before exporting.")
+            warning_dialog.show()
+        else:
+            self.export = True   
+            save_dialog.set_current_name(self.project.filename.rsplit("/",1)[1])
+            save_dialog.show()
     
     def on_quit_program_activated(self, data=None):
         """ Exit program, ask if unsaved changes should be saved """
@@ -158,6 +188,8 @@ class Handler:
     def on_run_all_clicked(self, data=None):
         """ Run all modules from selected module """
         terminal = self.builder.get_object('file_selection_viewer')
+        stop_button = self.builder.get_object('fsv_stop_button')
+        stop_button.set_visible(True)
         textview = self.builder.get_object('file_selection_textview')
         self.builder.get_object('fsv_header').set_title('Run All')
         buff = self.builder.get_object('file_selection_buffer')
@@ -182,7 +214,8 @@ class Handler:
         # fire up the thread
         thread.start()
         # make a new log for this run
-        self.log_run_liststore.append([self.get_date()])
+        self.date = self.get_date()
+        self.log_run_liststore.append([self.date])
     
     def get_date(self):
         """ Return the date formatted as "YYYY/MM/DD@HH:MM:SS" """
@@ -198,7 +231,7 @@ class Handler:
                     ":"+mn.zfill(2)+":"+sec.zfill(2))
     
     def on_view_terminal_clicked(self, file_selection_viewer):
-        """ View terminal output """
+        """ Show the terminal if a process is active """
         if self.process_live:
             file_selection_viewer.show()
         else:
@@ -207,40 +240,70 @@ class Handler:
             warning_dialog.format_secondary_markup("No active processes.")
             warning_dialog.show()
             
-    """ These subroutines are associated with run all """
+    """ The following subroutines are associated with run all tool button """
     
     def execute_cmd(self, to_run, textview, buff, prj_cwd):
-        for module, cmds in to_run.items():
-            self.builder.get_object('fsv_header').set_title('Running ' + module.name)
+        """ Execute all cmds in module """
+        # iterate through the dictionary
+        count = 0
+        for self.mod, cmds in to_run.items():
+            # update the header
+            self.builder.get_object('fsv_header').set_title('Running ' + self.mod.name)
+            # iterate through the commands
             for i, cmd in enumerate(cmds):
                 if self.process_live:
+                    # give user some feedback on process
                     self.builder.get_object('fsv_header').set_subtitle("("+str(i+1)+" of "+str(len(cmds))+") "+ cmd)
-                    cp = SP.Popen([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True, cwd=prj_cwd, preexec_fn=os.setsid)
-                    self.pid = cp.pid      
+                    self.cp = SP.Popen([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True, cwd=prj_cwd, preexec_fn=os.setsid)
+                    # store the process id in Handler object so we can kill it
+                    # if necessary
+                    self.pid = self.cp.pid      
                     # poll till process terminates
-                    GLib.timeout_add(500, update_terminal, (cp, textview, buff))
-                    cp.wait()
-                    if cp.returncode == 0:
-                        module.state = "Process complete."
-                    else:
-                        self.process_live = False
-                        module.state = "Process completed with errors. See log for details."
-                        break
+                    GLib.timeout_add(500, update_terminal, (self.cp, textview, buff))
+                    # wait for the thread to finish up
+                    self.cp.wait()   
                 else:
-                    module.state = "Process killed. See log for details."
                     break
+            # store log
+            if count > 1:
+                # get last end iter
+                start = end
+                discard, end = buff.get_bounds() 
+            else:
+                start, end = buff.get_bounds()
+            self.mod.log = buff.get_text(start, end, -1) 
+            if self.cp.returncode == 0:
+                self.mod.state = "Process complete."
+            elif (self.mod.state != "Process killed. See log for details." and
+                not self.process_live):
+                # terminated with error code 1 or more
+                self.mod.state = "Unprocessed."
+                self.mod.log = "No terminal output."
+            elif self.mod.state != "Process killed. See log for details.":
+                self.mod.state = "Process terminated with errors. See log for details."   
+            self.mod.run_time = self.date
+            self.log_mod_liststore.append([self.date, self.mod.name, self.mod.state, self.mod.log])
+            self.project.logs.append([self.date, self.mod.name, self.mod.state, self.mod.log])
+            count += 1
+            
+        # update the gui with new module states post run
         self.reset_module_states()
     
     def on_stop_process_clicked(self, cancel_process_dialog):
+        """ Show cancel process dialog """
         cancel_process_dialog.set_markup("<b>Warning</b>")
         cancel_process_dialog.format_secondary_markup("Are you sure you want to cancel the process?")
         cancel_process_dialog.show()
     
     def on_cancel_process_dialog_response(self, cancel_process_dialog, response):
-        if response == -8:
+        """ kill the process if user says so """
+        if response == -8: # this was the output
             os.killpg(os.getpgid(self.pid), signal.SIGTERM)  # Send the signal to all the process groups
+            # no live processes anymore
             self.process_live = False
             self.builder.get_object('fsv_header').set_subtitle('Process killed.')
+            self.mod.state = "Process killed. See log for details."
+            self.cp.kill()
         cancel_process_dialog.hide()
     
     """ Back to toolbar handlers now... """
@@ -286,8 +349,18 @@ class Handler:
         self.set_self_module()
         Gtk.show_uri_on_window(None, self.module.uri, Gdk.CURRENT_TIME)
     
-    def on_view_log_clicked(self, data=None):
-        pass
+    def on_view_log_clicked(self, viewer):
+        header = self.builder.get_object('fsv_header')
+        buff = self.builder.get_object('file_selection_buffer')
+        model, iterr = self.builder.get_object('pro_ed_selection').get_selected()
+        mod_name = model.get_value(iterr, 1)
+        for module in self.project.modules:
+            if mod_name == module.name: 
+                header.set_title(module.name)
+                header.set_subtitle(module.run_time)
+                buff.set_text(module.log, -1)
+                break
+        viewer.show()  
     
     def on_move_up_clicked(self, data=None):
         """ Move selected module up one position in queue """
@@ -383,15 +456,31 @@ class Handler:
     """ Log Viewer Handlers """
     ###################################
     
-    def on_log_viewer_selection_changed(self, selection):
+    def on_log_run_selection_changed(self, selection):
         self.log_filter.refilter()
     
-    def on_log_run_selection_changed(self, selection):
+    def on_log_mod_selection_changed(self, selection):
+        #pdb.set_trace()        
+        buff = self.builder.get_object('log_buff')
         model, iterr = selection.get_selected()
-        self.log_run_iter = iterr
+        if iterr is not None:
+            mod_date = model.get_value(iterr, 0)
+            mod_name = model.get_value(iterr, 1)
+            for log in self.project.logs:
+                if log[0] == mod_date and log[1] == mod_name:
+                    buff.set_text(log[3],-1)
     
-    def log_viewer_filter_func(self, model, iterr, data):
-        print(self.log_run_iter[0])
+    def log_filter_func(self, model, iterr, data):
+        selection = self.builder.get_object('log_run_selection')
+        run_model, run_iterr = selection.get_selected()
+        if run_iterr is not None:
+            date = run_model.get_value(run_iterr, 0)
+            mod_date = model.get_value(iterr, 0)
+            if mod_date is not None:
+                if date == mod_date:
+                    return True
+        else:
+            return False
     
     ###################################
     """ Preferences Handlers"""
@@ -819,7 +908,12 @@ class Handler:
                                                     loop.var,
                                                     loop.var_selection,
                                                     loop.dir_selection])
-    
+        last_date = None
+        for log in self.project.logs:
+            if log[0] != last_date:
+                self.log_run_liststore.append([log[0]])
+            self.log_mod_liststore.append([log[0],log[1],log[2],log[3]])
+            last_date = log[0]
     def reset_loop_liststore(self):
         self.loop_liststore.clear()
         for i,loop in enumerate(self.tempcmd.loops):
@@ -882,6 +976,8 @@ class Handler:
         self.pro_liststore.clear()
         self.loop_liststore.clear()
         self.lv_liststore.clear()
+        self.log_run_liststore.clear()
+        self.log_mod_liststore.clear()
     
     def __init__(self, project, builder, liststores, tagtable):
         self.project = project
@@ -895,7 +991,8 @@ class Handler:
         #Creating the filter, feeding it with the liststore model
         self.log_filter = self.log_mod_liststore.filter_new()
         #setting the filter function
-        self.log_filter.set_visible_func(self.log_viewer_filter_func)
+        self.log_filter.set_visible_func(self.log_filter_func)
+        self.builder.get_object('log_mod_treeview').set_model(self.log_filter)
         self.tagtable = tagtable
         self.__init_project()
         # timeout to check if project obj state has changed

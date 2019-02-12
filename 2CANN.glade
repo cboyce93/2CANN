@@ -292,7 +292,7 @@ Author: Cameron Boyce
                             <property name="can_focus">False</property>
                             <property name="image">import</property>
                             <property name="use_stock">False</property>
-                            <signal name="activate" handler="on_import_project_activated" swapped="no"/>
+                            <signal name="activate" handler="on_import_project_activated" object="open_dialog" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -302,7 +302,7 @@ Author: Cameron Boyce
                             <property name="can_focus">False</property>
                             <property name="image">export</property>
                             <property name="use_stock">False</property>
-                            <signal name="activate" handler="on_export_project_activated" swapped="no"/>
+                            <signal name="activate" handler="on_export_project_activated" object="save_dialog" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -510,6 +510,7 @@ Author: Cameron Boyce
                 <property name="tooltip_markup" translatable="yes">&lt;b&gt;View Log&lt;/b&gt;</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-select-all</property>
+                <signal name="clicked" handler="on_view_log_clicked" object="file_selection_viewer" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -570,7 +571,7 @@ Author: Cameron Boyce
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <child internal-child="selection">
-                  <object class="GtkTreeSelection">
+                  <object class="GtkTreeSelection" id="pro_ed_selection">
                     <signal name="changed" handler="on_pro_manager_selection_changed" swapped="no"/>
                   </object>
                 </child>
@@ -1273,7 +1274,7 @@ Naail Khan</property>
             <property name="column_spacing">10</property>
             <child>
               <object class="GtkScrolledWindow">
-                <property name="width_request">145</property>
+                <property name="width_request">142</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
@@ -1282,7 +1283,7 @@ Naail Khan</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <child internal-child="selection">
-                      <object class="GtkTreeSelection">
+                      <object class="GtkTreeSelection" id="log_run_selection">
                         <signal name="changed" handler="on_log_run_selection_changed" swapped="no"/>
                       </object>
                     </child>
@@ -1296,7 +1297,7 @@ Naail Khan</property>
             </child>
             <child>
               <object class="GtkScrolledWindow">
-                <property name="width_request">120</property>
+                <property name="width_request">350</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
@@ -1305,7 +1306,9 @@ Naail Khan</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <child internal-child="selection">
-                      <object class="GtkTreeSelection"/>
+                      <object class="GtkTreeSelection" id="log_mod_selection">
+                        <signal name="changed" handler="on_log_mod_selection_changed" swapped="no"/>
+                      </object>
                     </child>
                   </object>
                 </child>
@@ -2065,6 +2068,7 @@ Naail Khan</property>
     <property name="window_position">center-on-parent</property>
     <property name="default_width">440</property>
     <property name="icon">img/icon.png</property>
+    <property name="gravity">center</property>
     <property name="transient_for">command_editor</property>
     <signal name="delete-event" handler="close" swapped="no"/>
     <child>
@@ -2082,11 +2086,10 @@ Naail Khan</property>
             <property name="can_focus">False</property>
             <property name="title" translatable="yes">File Selection Viewer</property>
             <child>
-              <object class="GtkButton">
+              <object class="GtkButton" id="fsv_stop_button">
                 <property name="label">gtk-stop</property>
                 <property name="width_request">100</property>
                 <property name="height_request">30</property>
-                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
@@ -2111,15 +2114,18 @@ Naail Khan</property>
               <object class="GtkTextView" id="file_selection_textview">
                 <property name="name">200</property>
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="pixels_below_lines">2</property>
                 <property name="editable">False</property>
+                <property name="wrap_mode">word</property>
                 <property name="left_margin">12</property>
                 <property name="right_margin">12</property>
                 <property name="top_margin">12</property>
                 <property name="bottom_margin">12</property>
                 <property name="cursor_visible">False</property>
                 <property name="buffer">file_selection_buffer</property>
+                <property name="accepts_tab">False</property>
               </object>
             </child>
           </object>

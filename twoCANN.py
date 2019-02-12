@@ -64,11 +64,20 @@ class twoCANN:
         return log_run_liststore
         
     def __init_log_mod_treeview(self, treeview):
-        log_mod_liststore = Gtk.ListStore(str)
-        treeview.set_model(log_mod_liststore)
+        log_mod_liststore = Gtk.ListStore(str, str, str, str)
         renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn("Module", renderer, text=0)
-        column.set_sort_column_id(0)
+        column = Gtk.TreeViewColumn("Run Time", renderer, text=0)
+        column.set_visible(False)
+        treeview.append_column(column)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Module", renderer, text=1)
+        treeview.append_column(column)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("State", renderer, text=2)
+        treeview.append_column(column)
+        renderer = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Log", renderer, text=3)
+        column.set_visible(False)
         treeview.append_column(column)
         return log_mod_liststore
 
