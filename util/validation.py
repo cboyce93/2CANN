@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import re
+
 def validate_module(m):
     """ Return a tuple with bool and error message """
     error_message = ""
@@ -14,6 +16,17 @@ def validate_module(m):
     else:
         return (True, None)
 
-def validate_flag_module():
-    pass
+def validate_loop_dir_selection(dir_exp):
+    """ Return a tuple with bool and error message
+    
+    Valid directory selection contains
+    -   ONE <v></v> open and closing local var tag
+    """
+    m = re.findall(r'(<v>%{.*?}</v>)', dir_exp)
+    if len(m) == 0:
+        return (False, "You must include one open and closing local var tag.")
+    if len(m) > 1:
+        return (False, "Only one open and closing local var tag allowed.")
+    if len(m)==1:
+        return (True, None)
     

@@ -352,6 +352,8 @@ class Handler:
     def on_view_log_clicked(self, viewer):
         header = self.builder.get_object('fsv_header')
         buff = self.builder.get_object('file_selection_buffer')
+        stop_button = self.builder.get_object('fsv_stop_button')
+        stop_button.set_visible(False)
         model, iterr = self.builder.get_object('pro_ed_selection').get_selected()
         mod_name = model.get_value(iterr, 1)
         for module in self.project.modules:
@@ -459,8 +461,7 @@ class Handler:
     def on_log_run_selection_changed(self, selection):
         self.log_filter.refilter()
     
-    def on_log_mod_selection_changed(self, selection):
-        #pdb.set_trace()        
+    def on_log_mod_selection_changed(self, selection):      
         buff = self.builder.get_object('log_buff')
         model, iterr = selection.get_selected()
         if iterr is not None:
@@ -622,6 +623,8 @@ class Handler:
     
     def ce_on_loop_file_sel_clicked(self, file_selection_viewer):
         buff = self.builder.get_object('file_selection_buffer')
+        stop_button = self.builder.get_object('fsv_stop_button')
+        stop_button.set_visible(False)
         buff.set_text(get_loop_file_selection(self.builder, 
                                                 self.project,
                                                 self.module,
@@ -629,9 +632,12 @@ class Handler:
         file_selection_viewer.show()
     
     def ce_on_run_test_clicked(self, file_selection_viewer):
+        self.mod = self.module  # make the kill function happy
         cmds = generate_cmds(self.builder, self.project, self.tempcmd)    
         terminal = file_selection_viewer
         textview = self.builder.get_object('file_selection_textview')
+        stop_button = self.builder.get_object('fsv_stop_button')
+        stop_button.set_visible(True)
         self.builder.get_object('fsv_header').set_title('Run Test')
         self.builder.get_object('fsv_header').set_subtitle(self.module.name)
         terminal.show()
@@ -649,11 +655,11 @@ class Handler:
         for i, cmd in enumerate(cmds):
             if self.process_live:
                 self.builder.get_object('fsv_header').set_subtitle("("+str(i+1)+" of "+str(len(cmds))+") "+ cmd)
-                cp = SP.Popen([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True, cwd=prj_cwd, preexec_fn=os.setsid)   
-                self.pid = cp.pid     
+                self.cp = SP.Popen([cmd], stdout=SP.PIPE, stderr=SP.PIPE, shell=True, cwd=prj_cwd, preexec_fn=os.setsid)   
+                self.pid = self.cp.pid     
                 # poll till process terminates
-                GLib.timeout_add(500, update_terminal, (cp, textview, buff))
-                cp.wait()
+                GLib.timeout_add(500, update_terminal, (self.cp, textview, buff))
+                self.cp.wait()
             else:
                 break
                 
@@ -670,12 +676,10 @@ class Handler:
     # # # # # # # # # # # # #
     
     def on_add_function_clicked(self, function_editor):
-        if self.tempcmd.func[2] is "":
-            function_editor.show()
-        else:
+        if self.tempcmd.func[2] is not "":
             self.builder.get_object('function_editor_header').set_title('Edit Function')
-            self.builder.get_object('function_editor_entry').set_text(self.tempcmd.func[2])
-            function_editor.show()
+        self.builder.get_object('function_editor_entry').set_text(self.tempcmd.func[2])
+        function_editor.show()
     
     def on_add_flag_option_clicked(self, flag_option_editor):
         self.edit_flag = False, None
@@ -774,25 +778,33 @@ class Handler:
     def on_le_ok_button_clicked(self, loop_editor):
         var = self.builder.get_object('le_var_entry').get_text()
         dir_selection = self.builder.get_object('le_dir_selection_entry').get_text()
-        if self.edit_loop:
-            self.loop.var = "$"+var
-            self.loop.var_selection = get_local_var_value(dir_selection)
-            self.loop.dir_selection = dir_selection
-            self.loop_liststore.set(self.loop_liststore_iter,
-                                    [1,2,3],
-                                    ["$"+var,
-                                    get_local_var_value(dir_selection),
-                                    dir_selection])
+        valid, error = validate_loop_dir_selection(dir_selection)
+        if valid:
+            if self.edit_loop:
+                self.loop.var = "$"+var
+                self.loop.var_selection = get_local_var_value(dir_selection)
+                self.loop.dir_selection = dir_selection
+                self.loop_liststore.set(self.loop_liststore_iter,
+                                        [1,2,3],
+                                        ["$"+var,
+                                        get_local_var_value(dir_selection),
+                                        dir_selection])
+            else:
+                # add new loop
+                loop_no = len(self.tempcmd.loops)+1
+                self.loop = Loop(loop_no, "$"+var, get_local_var_value(dir_selection), dir_selection)
+                iterr = self.loop_liststore.append([loop_no,
+                                                    "$"+var,
+                                                    get_local_var_value(dir_selection),
+                                                    dir_selection])
+                self.tempcmd.loops.append(self.loop)
+            loop_editor.hide()
         else:
-            # add new loop
-            loop_no = len(self.tempcmd.loops)+1
-            self.loop = Loop(loop_no, "$"+var, get_local_var_value(dir_selection), dir_selection)
-            iterr = self.loop_liststore.append([loop_no,
-                                                "$"+var,
-                                                get_local_var_value(dir_selection),
-                                                dir_selection])
-            self.tempcmd.loops.append(self.loop)
-        loop_editor.hide()
+            warning_dialog = self.builder.get_object('warning_dialog')
+            warning_dialog.set_markup("<b>Warning</b>")
+            warning_dialog.format_secondary_markup(error)
+            warning_dialog.show()
+            
     
     ###################################
     """ Function Editor Handlers"""
@@ -914,6 +926,7 @@ class Handler:
                 self.log_run_liststore.append([log[0]])
             self.log_mod_liststore.append([log[0],log[1],log[2],log[3]])
             last_date = log[0]
+    
     def reset_loop_liststore(self):
         self.loop_liststore.clear()
         for i,loop in enumerate(self.tempcmd.loops):
@@ -996,9 +1009,5 @@ class Handler:
         self.tagtable = tagtable
         self.__init_project()
         # timeout to check if project obj state has changed
-        GLib.timeout_add(500, self.__unsaved_changes, ())
-        
-        
-        
-        
+        GLib.timeout_add(500, self.__unsaved_changes, ())  
 

@@ -2068,7 +2068,6 @@ Naail Khan</property>
     <property name="window_position">center-on-parent</property>
     <property name="default_width">440</property>
     <property name="icon">img/icon.png</property>
-    <property name="gravity">center</property>
     <property name="transient_for">command_editor</property>
     <signal name="delete-event" handler="close" swapped="no"/>
     <child>

@@ -40,7 +40,6 @@ class twoCANN:
             renderer = Gtk.CellRendererText()
             column = Gtk.TreeViewColumn(col_title, renderer, text=i)
             treeview.append_column(column)
-        # FOR TEST
         return loop_liststore
     
     def __init_loop_viewer_treeview(self, treeview):
@@ -51,7 +50,6 @@ class twoCANN:
             column = Gtk.TreeViewColumn(col_title, renderer, text=i)
             column.set_sort_column_id(i)
             treeview.append_column(column)
-        # FOR TEST
         return lv_liststore
     
     def __init_log_run_treeview(self, treeview):
@@ -110,3 +108,4 @@ def main():
 if __name__ == "__main__":
     win = twoCANN()
     main()
+
