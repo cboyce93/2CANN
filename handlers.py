@@ -778,7 +778,7 @@ class Handler:
     def on_le_ok_button_clicked(self, loop_editor):
         var = self.builder.get_object('le_var_entry').get_text()
         dir_selection = self.builder.get_object('le_dir_selection_entry').get_text()
-        valid, error = validate_loop_dir_selection(dir_selection)
+        valid, error = validate_loop(var, dir_selection)
         if valid:
             if self.edit_loop:
                 self.loop.var = "$"+var

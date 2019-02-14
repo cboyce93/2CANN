@@ -16,12 +16,20 @@ def validate_module(m):
     else:
         return (True, None)
 
-def validate_loop_dir_selection(dir_exp):
+def validate_loop(var, dir_exp):
     """ Return a tuple with bool and error message
     
     Valid directory selection contains
     -   ONE <v></v> open and closing local var tag
     """
+    if not var.islower():
+        return (False, "var - Only lowercase characters allowed.")
+    for char in var:
+        if char.isspace():
+            return (False, "var - No whitespaces allowed.")
+    if not var.isalpha():
+        return (False, "var -No special characters allowed.")
+    
     m = re.findall(r'(<v>%{.*?}</v>)', dir_exp)
     if len(m) == 0:
         return (False, "You must include one open and closing local var tag.")
