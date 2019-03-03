@@ -7,17 +7,53 @@ class Command:
 
     def __init__(self):
         self.loops = []
-        
+
         # command function
-        self.func = [None, None, ""] 
-               
+        self.func = [None, None, ""]
+
         # command options
         self.flags = []
-        self.statics = []   
+        self.statics = []
         self.sets = []
         self.max_index = float(0)
         self.str = ""
-        
+
+    def __ne__(self,o):
+        """Checks if command objects are not equal. Returns true if they aren't"""
+        # check if loops are the same
+        if len(self.loops) != len(o.loops):
+            return True
+        else:
+            for i in range(len(self.loops)):
+                if self.loops[i] != o.loops[i]:
+                    return True
+
+        # check if function is the same
+        if len(self.func) != len(o.func):
+            return True
+        else:
+            for i in range(len(self.func)):
+                if self.func[i] != o.func[i]:
+                    return True
+                    
+        if self.statics != o.statics:
+            return True
+
+        if self.sets != o.sets:
+            return True
+
+        if self.sets != o.sets:
+            return True
+
+        if self.max_index != o.max_index:
+            return True
+
+        if self.str != o.str:
+            return True
+
+        else:
+            return False
+
     def get_max_index(self):
         """ return max index of module command so that adjustment does
             not allow the input of out-of-range indices"""
@@ -47,16 +83,15 @@ class Command:
                 matches = re.findall(r'({.*?})', selection)
                 for m in matches:
                     if m[1:-1] == key:
-                        selection = selection.replace(m, val) 
+                        selection = selection.replace(m, val)
             if not relative:
                 mystring += prefix + " " + selection + " "
             else:
                 mystring += prefix + " " + exec_dir + selection + " "
         return mystring
-        
+
     def populate_global_vars(self, mystring, project_vars):
         # replace global variables with user values
         for var in project_vars:
             mystring = mystring.replace(var[0], var[1])
         return mystring
-

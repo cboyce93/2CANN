@@ -20,7 +20,7 @@ class twoCANN:
             treeview.append_column(column)
         # FOR TEST
         return variables_liststore
-        
+
     def __init_pro_manager_treeview(self, treeview):
         pro_liststore = Gtk.ListStore(int, str, str)
         treeview.set_model(pro_liststore)
@@ -31,8 +31,8 @@ class twoCANN:
             if i == 1:
                 column.set_min_width(100)   # min width for module name
         # FOR TEST
-        return pro_liststore  
-    
+        return pro_liststore
+
     def __init_loop_manager_treeview(self, treeview):
         loop_liststore = Gtk.ListStore(int, str, str, str)
         treeview.set_model(loop_liststore)
@@ -41,7 +41,7 @@ class twoCANN:
             column = Gtk.TreeViewColumn(col_title, renderer, text=i)
             treeview.append_column(column)
         return loop_liststore
-    
+
     def __init_loop_viewer_treeview(self, treeview):
         lv_liststore = Gtk.ListStore(str, str)
         treeview.set_model(lv_liststore)
@@ -51,7 +51,7 @@ class twoCANN:
             column.set_sort_column_id(i)
             treeview.append_column(column)
         return lv_liststore
-    
+
     def __init_log_run_treeview(self, treeview):
         log_run_liststore = Gtk.ListStore(str)
         treeview.set_model(log_run_liststore)
@@ -60,7 +60,7 @@ class twoCANN:
         column.set_sort_column_id(0)
         treeview.append_column(column)
         return log_run_liststore
-        
+
     def __init_log_mod_treeview(self, treeview):
         log_mod_liststore = Gtk.ListStore(str, str, str, str)
         renderer = Gtk.CellRendererText()
@@ -91,7 +91,7 @@ class twoCANN:
         loop_viewer_liststore = self.__init_loop_viewer_treeview(builder.get_object('loop_viewer_treeview'))
         log_run_liststore = self.__init_log_run_treeview(builder.get_object('log_run_treeview'))
         log_mod_liststore = self.__init_log_mod_treeview(builder.get_object('log_mod_treeview'))
-        liststores = (variables_liststore, pro_liststore, loop_liststore, 
+        liststores = (variables_liststore, pro_liststore, loop_liststore,
                         loop_viewer_liststore, log_run_liststore, log_mod_liststore)
         # build tag table for command editor Gtk.TextView for different
         # text styles
@@ -108,4 +108,3 @@ def main():
 if __name__ == "__main__":
     win = twoCANN()
     main()
-
