@@ -194,35 +194,41 @@ class Handler:
 
     def on_run_all_clicked(self, data=None):
         """ Run all modules from selected module """
-        terminal = self.builder.get_object('file_selection_viewer')
-        stop_button = self.builder.get_object('fsv_stop_button')
-        stop_button.set_visible(True)
-        textview = self.builder.get_object('file_selection_textview')
-        self.builder.get_object('fsv_header').set_title('Run All')
-        buff = self.builder.get_object('file_selection_buffer')
-        # clear buffer so we start with empty terminal
-        buff.set_text("",-1)
-        # just shorten up
-        prj_cwd = self.project.working_directory
-        terminal.show()
-        # create an empty dictionary
-        # key - Module obj
-        # val - array of commands associated with module
-        to_run = {}
-        for module in self.project.modules:
-            cmds = generate_cmds(self.builder, self.project, module.command)
-            to_run[module] = cmds
-        # flag to tell us if a subprocess is active
-        self.process_live = True
-        # open up non-blocking thread
-        thread = threading.Thread(target=self.execute_cmd,
-                                    args=(to_run, textview, buff, prj_cwd))
-        thread.daemon = True
-        # fire up the thread
-        thread.start()
-        # make a new log for this run
-        self.date = self.get_date()
-        self.log_run_liststore.append([self.date])
+        if not validate_modules_exist(self.project.modules):
+            warning_dialog = self.builder.get_object('warning_dialog')
+            warning_dialog.set_markup("<b>Warning</b>")
+            warning_dialog.format_secondary_markup("Modules must be created before they are runned")
+            warning_dialog.show()
+        else:
+            terminal = self.builder.get_object('file_selection_viewer')
+            stop_button = self.builder.get_object('fsv_stop_button')
+            stop_button.set_visible(True)
+            textview = self.builder.get_object('file_selection_textview')
+            self.builder.get_object('fsv_header').set_title('Run All')
+            buff = self.builder.get_object('file_selection_buffer')
+            # clear buffer so we start with empty terminal
+            buff.set_text("",-1)
+            # just shorten up
+            prj_cwd = self.project.working_directory
+            terminal.show()
+            # create an empty dictionary
+            # key - Module obj
+            # val - array of commands associated with module
+            to_run = {}
+            for module in self.project.modules:
+                cmds = generate_cmds(self.builder, self.project, module.command)
+                to_run[module] = cmds
+            # flag to tell us if a subprocess is active
+            self.process_live = True
+            # open up non-blocking thread
+            thread = threading.Thread(target=self.execute_cmd,
+                                        args=(to_run, textview, buff, prj_cwd))
+            thread.daemon = True
+            # fire up the thread
+            thread.start()
+            # make a new log for this run
+            self.date = self.get_date()
+            self.log_run_liststore.append([self.date])
 
     def get_date(self):
         """ Return the date formatted as "YYYY/MM/DD@HH:MM:SS" """
@@ -317,25 +323,39 @@ class Handler:
 
     def on_new_module_clicked(self, module_editor):
         # Create new Module object
-        self.module = Module()
-        self.edit_module = False
-        self.builder.get_object('module_editor_header').set_title('New Module')
-        # clear the entries
-        self.builder.get_object('module_name_entry').set_text("")
-        self.builder.get_object('module_url_entry').set_text("")
-        self.builder.get_object('module_command_entry').set_text("")
-        self.builder.get_object('mod_notes_buff').set_text("",-1)
-        module_editor.show()
+        # check to see if module editor is already open
+        if module_editor.get_visible():
+            info_dialog = self.builder.get_object('info_dialog')
+            info_dialog.set_markup("<b>Info</b>")
+            info_dialog.format_secondary_markup("New module window already opened")
+            info_dialog.show()
+        else:
+            self.module = Module()
+            self.edit_module = False
+            self.builder.get_object('module_editor_header').set_title('New Module')
+            # clear the entries
+            self.builder.get_object('module_name_entry').set_text("")
+            self.builder.get_object('module_url_entry').set_text("")
+            self.builder.get_object('module_command_entry').set_text("")
+            self.builder.get_object('mod_notes_buff').set_text("",-1)
+            module_editor.show()
 
     def on_edit_module_clicked(self, module_editor):
-        self.set_self_module()
-        self.edit_module = True
-        self.builder.get_object('module_editor_header').set_title('Edit Module')
-        self.builder.get_object('module_name_entry').set_text(self.module.name)
-        self.builder.get_object('module_url_entry').set_text(self.module.uri)
-        self.builder.get_object('module_command_entry').set_text(self.module.command.str)
-        self.builder.get_object('mod_notes_buff').set_text(self.module.notes)
-        module_editor.show()
+        # check to if module_editor is already open or not
+        if module_editor.get_visible():
+            info_dialog = self.builder.get_object('info_dialog')
+            info_dialog.set_markup("<b>Info</b>")
+            info_dialog.format_secondary_markup("Edit module window already opened")
+            info_dialog.show()
+        else:
+            self.set_self_module()
+            self.edit_module = True
+            self.builder.get_object('module_editor_header').set_title('Edit Module')
+            self.builder.get_object('module_name_entry').set_text(self.module.name)
+            self.builder.get_object('module_url_entry').set_text(self.module.uri)
+            self.builder.get_object('module_command_entry').set_text(self.module.command.str)
+            self.builder.get_object('mod_notes_buff').set_text(self.module.notes)
+            module_editor.show()
 
     def on_delete_module_clicked(self, message_dialog):
         self.set_self_module()
@@ -354,7 +374,14 @@ class Handler:
 
     def on_open_module_ref_clicked(self, warning_dialog):
         self.set_self_module()
-        Gtk.show_uri_on_window(None, self.module.uri, Gdk.CURRENT_TIME)
+        # check to see if module has url link
+        if self.module.uri == "":
+            info_dialog = self.builder.get_object('info_dialog')
+            info_dialog.set_markup("<b>Info</b>")
+            info_dialog.format_secondary_markup("Selected module doesn't have a reference yet. YOu can add one by editing module")
+            info_dialog.show()
+        else:
+            Gtk.show_uri_on_window(None, self.module.uri, Gdk.CURRENT_TIME)
 
     def on_view_log_clicked(self, viewer):
         header = self.builder.get_object('fsv_header')
@@ -365,11 +392,17 @@ class Handler:
         mod_name = model.get_value(iterr, 1)
         for module in self.project.modules:
             if mod_name == module.name:
-                header.set_title(module.name)
-                header.set_subtitle(module.run_time)
-                buff.set_text(module.log, -1)
-                break
-        viewer.show()
+                if module.log == None:
+                    info_dialog = self.builder.get_object('info_dialog')
+                    info_dialog.set_markup("<b>Info</b>")
+                    info_dialog.format_secondary_markup("Module has not been run yet")
+                    info_dialog.show()
+                    break
+                else:
+                    header.set_title(module.name)
+                    header.set_subtitle(module.run_time)
+                    buff.set_text(module.log, -1)
+                    viewer.show()
 
     def on_move_up_clicked(self, data=None):
         """ Move selected module up one position in queue """
@@ -505,16 +538,23 @@ class Handler:
         name = self.builder.get_object('ve_name_entry').get_text()
         fs = self.builder.get_object('ve_file_selection_entry').get_text()
         # CALL VALIDATION SUB HERE
-        self.variable.name = "${" + name +"}"
-        self.variable.val = fs
-        if self.ve_state == 0:
-            self.variables_liststore.append([self.variable.name, self.variable.val])
+        # name must contain only capital letters
+        if name.isupper() and name.isalpha():
+            self.variable.name = "${" + name +"}"
+            self.variable.val = fs
+            if self.ve_state == 0:
+                self.variables_liststore.append([self.variable.name, self.variable.val])
+            else:
+                self.variables_liststore.set_value(self.treeiter, 0 , self.variable.name)
+                self.variables_liststore.set_value(self.treeiter, 1, self.variable.val)
+            serialize_treemodel(self.builder.get_object('vm_treeview').get_model(),
+                                self.project)
+            variable_editor.hide()
         else:
-            self.variables_liststore.set_value(self.treeiter, 0 , self.variable.name)
-            self.variables_liststore.set_value(self.treeiter, 1, self.variable.val)
-        serialize_treemodel(self.builder.get_object('vm_treeview').get_model(),
-                            self.project)
-        variable_editor.hide()
+            warning_dialog = self.builder.get_object('warning_dialog')
+            warning_dialog.set_markup("<b>Warning</b>")
+            warning_dialog.format_secondary_markup("Name must be capital and only contain letters. Please enter new name")
+            warning_dialog.show()
 
     ###################################
     """ Module Editor Handlers"""
@@ -537,8 +577,9 @@ class Handler:
         uri = self.builder.get_object('module_url_entry').get_text()
         buff = self.builder.get_object('mod_notes_buff')
         notes = buff.get_text(buff.get_start_iter(), buff.get_end_iter(), False)
-        #valid, error_message = validate_module(self.module)
-        if True:
+        valid, error_message = validate_module(self.module)
+        print(str(valid))
+        if valid:
             if self.edit_module:
                 self.module.name = name
                 self.module.uri = uri
